@@ -21,7 +21,16 @@
       "Bash(docker compose *)",
       "Bash(gh --version)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(grep -i \"\\\\.env$\")",
+      "Bash(grep -E \"venv/|node_modules/|__pycache__|\\\\.db$|\\\\.next/\")",
+      "Bash(git commit -m 'Initial commit: Brand Compass v1.0 *)",
+      "Bash(mv \"README \\(1\\).md\" README.md)",
+      "Bash(git rm *)",
+      "Bash(git commit *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)"
     ]
   }
 }

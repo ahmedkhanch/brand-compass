@@ -19,8 +19,24 @@ if str(_BACKEND_DIR) not in sys.path:
 from ..providers.deepseek import DeepSeekProvider, DeepSeekError
 
 
-def _get_llm(deepseek_key: str = None) -> DeepSeekProvider:
-    """Get the available LLM provider. Currently DeepSeek-only."""
+def _get_llm(deepseek_key: str = None):
+    """Get the best available LLM provider. Tries Claude → OpenAI → DeepSeek."""
+    # Try Claude first (best quality)
+    try:
+        from ..providers.claude import ClaudeProvider, ClaudeError
+        return ClaudeProvider()
+    except Exception:
+        pass
+
+    # Try OpenAI second
+    try:
+        from ..providers.openai import OpenAIProvider, OpenAIError
+        return OpenAIProvider()
+    except Exception:
+        pass
+
+    # Fall back to DeepSeek
+    from ..providers.deepseek import DeepSeekProvider
     return DeepSeekProvider(api_key=deepseek_key)
 
 
@@ -52,7 +68,7 @@ def analyze_positioning(brand_name: str, website_text: str, industry: str = "",
 
     try:
         return llm.chat_json(prompt, system=system, max_tokens=max_tokens)
-    except DeepSeekError as e:
+    except Exception as e:
         return {"error": str(e)}
 
 
@@ -75,7 +91,7 @@ def analyze_swot(brand_name: str, website_text: str, industry: str = "",
 
     try:
         return llm.chat_json(prompt, system=system, max_tokens=max_tokens)
-    except DeepSeekError as e:
+    except Exception as e:
         return {"error": str(e)}
 
 
@@ -99,7 +115,7 @@ def analyze_competitive(brand_name: str, website_text: str, industry: str = "",
 
     try:
         return llm.chat_json(prompt, system=system, max_tokens=max_tokens)
-    except DeepSeekError as e:
+    except Exception as e:
         return {"error": str(e)}
 
 
@@ -136,7 +152,7 @@ def generate_recommendations(brand_name: str, website_text: str, industry: str =
 
     try:
         return llm.chat_json(prompt, system=system, max_tokens=max_tokens)
-    except DeepSeekError as e:
+    except Exception as e:
         return {"error": str(e)}
 
 

@@ -1,0 +1,36 @@
+id: recommendations_v1
+model: claude-sonnet-4-5
+temperature: 0.3
+max_tokens: 1500
+
+system: |
+  You are a brand strategy consultant. Based on the brand analysis data provided,
+  generate specific, actionable recommendations. Prioritize by impact. Return ONLY valid JSON.
+
+user: |
+  Generate actionable recommendations for this brand.
+
+  Brand: {{ brand_name }}
+  Industry: {{ industry }}
+  SEO Score: {{ seo_score }}/100
+  {% if swot_context %}{{ swot_context }}{% endif %}
+
+  Website content:
+  ---
+  {{ website_text }}
+  ---
+
+  Return ONLY valid JSON:
+  {
+    "quick_wins": [
+      {"action": "specific action", "impact": "high | medium | low", "effort": "hours | days | weeks"},
+      {"action": "specific action", "impact": "high | medium | low", "effort": "hours | days | weeks"},
+      {"action": "specific action", "impact": "high | medium | low", "effort": "hours | days | weeks"}
+    ],
+    "strategic_moves": [
+      {"action": "long-term strategic initiative", "timeframe": "3 months | 6 months | 12 months"},
+      {"action": "long-term strategic initiative", "timeframe": "3 months | 6 months | 12 months"}
+    ],
+    "priority_focus": "one sentence on what the brand should focus on right now",
+    "executive_summary": "2-3 sentence overall assessment with top recommendation"
+  }

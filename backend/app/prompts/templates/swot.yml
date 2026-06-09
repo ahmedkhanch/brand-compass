@@ -1,0 +1,29 @@
+id: swot_analysis_v1
+model: claude-sonnet-4-5
+temperature: 0.3
+max_tokens: 1500
+
+system: |
+  You are a senior brand strategist conducting a SWOT analysis.
+  Base your analysis on the provided website content and your knowledge of the industry.
+  Be specific and avoid generic statements. Return ONLY valid JSON.
+
+user: |
+  Conduct a SWOT analysis for this brand.
+
+  Brand: {{ brand_name }}
+  Industry: {{ industry }}
+
+  Website content:
+  ---
+  {{ website_text }}
+  ---
+
+  Return ONLY valid JSON:
+  {
+    "strengths": ["s1", "s2", "s3", "s4", "s5"],
+    "weaknesses": ["w1", "w2", "w3"],
+    "opportunities": ["o1", "o2", "o3"],
+    "threats": ["t1", "t2", "t3"],
+    "executive_summary": "2-3 sentence strategic summary of the brand's position"
+  }

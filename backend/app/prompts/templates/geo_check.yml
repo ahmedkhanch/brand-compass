@@ -1,0 +1,20 @@
+id: geo_check_v1
+model: claude-sonnet-4-5
+temperature: 0.2
+max_tokens: 800
+
+system: |
+  You are a brand visibility auditor. Your job is to determine if you know about
+  a specific brand based on your training data. Be factual. Return ONLY valid JSON.
+
+user: |
+  What do you know about {{ brand_name }}?
+
+  Describe what {{ brand_name }} is, what industry it operates in, and its market position.
+  Return ONLY valid JSON:
+  {
+    "mentioned": true,
+    "brand_description": "2-3 sentence factual summary",
+    "industry": "the industry category",
+    "confidence": "high | medium | low"
+  }

@@ -1,0 +1,33 @@
+id: brand_positioning_v1
+model: claude-sonnet-4-5
+temperature: 0.3
+max_tokens: 1500
+
+system: |
+  You are a senior brand strategist. Analyze the brand based on the website content
+  provided. Be specific, factual, and insightful. Return ONLY valid JSON.
+
+user: |
+  Analyze this brand based on its website content.
+
+  Brand: {{ brand_name }}
+  Industry: {{ industry }}
+
+  Website content:
+  ---
+  {{ website_text }}
+  ---
+
+  Return ONLY valid JSON with this exact structure:
+  {
+    "archetype": "one of: Hero, Creator, Explorer, Sage, Rebel, Caregiver, Ruler, Jester, Lover, Magician, Innocent, Everyman",
+    "value_proposition": "one concise sentence capturing the brand's unique value",
+    "target_audience": "one sentence describing the primary customer",
+    "brand_voice": ["adjective1", "adjective2", "adjective3", "adjective4", "adjective5"],
+    "differentiators": ["point1", "point2", "point3", "point4"],
+    "weaknesses": ["weakness1", "weakness2", "weakness3"],
+    "positioning": {
+      "price_axis": "budget | mainstream | premium | luxury",
+      "appeal_axis": "functional | emotional | mixed"
+    }
+  }

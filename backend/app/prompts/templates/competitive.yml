@@ -1,0 +1,34 @@
+id: competitive_analysis_v1
+model: claude-sonnet-4-5
+temperature: 0.3
+max_tokens: 1200
+
+system: |
+  You are a competitive intelligence analyst. Map the competitive landscape
+  for this brand based on website content and industry knowledge.
+  Be specific about how this brand differs from competitors. Return ONLY valid JSON.
+
+user: |
+  Analyze the competitive landscape for this brand.
+
+  Brand: {{ brand_name }}
+  Industry: {{ industry }}
+  {% if competitor %}Known competitor to compare against: {{ competitor }}{% endif %}
+
+  Website content:
+  ---
+  {{ website_text }}
+  ---
+
+  Return ONLY valid JSON:
+  {
+    "direct_competitors": [
+      {"name": "Competitor A", "positioning": "one sentence", "threat_level": "high | medium | low"},
+      {"name": "Competitor B", "positioning": "one sentence", "threat_level": "high | medium | low"},
+      {"name": "Competitor C", "positioning": "one sentence", "threat_level": "high | medium | low"}
+    ],
+    "brand_differentiator": "what makes {{ brand_name }} unique vs competitors",
+    "market_position": "market leader | strong challenger | niche player | emerging",
+    "competitive_advantage": "one sentence on the strongest competitive moat",
+    "competitive_threat": "one sentence on the biggest competitive risk"
+  }

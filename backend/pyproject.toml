@@ -1,0 +1,33 @@
+[project]
+name = "brand-compass"
+version = "0.1.0"
+description = "AI-powered SaaS brand intelligence platform"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+    "sqlalchemy>=2.0.25",
+    "aiosqlite>=0.19.0",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.0",
+    "pydantic-settings>=2.1.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1.0",
+    "arq>=0.26.0",
+    "requests>=2.28.0",
+    "python-dotenv>=1.0.0",
+    "anthropic>=0.39.0",
+    "openai>=1.0.0",
+    "pyjwt>=2.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.26.0",
+]
+
+[tool.alembic]
+script_location = "migrations"
+sqlalchemy_url = "sqlite+aiosqlite:///./brand_compass.db"

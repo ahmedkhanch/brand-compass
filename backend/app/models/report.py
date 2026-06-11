@@ -32,4 +32,4 @@ class Report(Base):
 
     user = relationship("User", back_populates="reports")
     brand = relationship("Brand", back_populates="reports")
-    costs = relationship("ReportCost", back_populates="report", lazy="selectin")
+    costs = relationship("ReportCost", back_populates="report", lazy="selectin", cascade="all, delete-orphan")

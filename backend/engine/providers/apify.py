@@ -1,9 +1,14 @@
 """Apify provider — Meta Ads Library scraper for competitive ad intelligence."""
 
 import os
+import time
 import requests
 
 APIFY_BASE = "https://api.apify.com/v2"
+
+ACTOR_ID = "dltik~facebook-ads-scraper"
+POLL_INTERVAL_S = 3
+MAX_POLL_S = 120
 
 
 class ApifyError(Exception):
@@ -33,12 +38,13 @@ class ApifyProvider:
     def search_meta_ads(self, brand_name: str, country: str = "US", max_results: int = 50) -> list:
         """
         Run the Meta Ads Library scraper and return ad results.
-        Uses dltik~facebook-ads-scraper (pay-per-result, no rental needed).
-        """
-        actor_id = "dltik~facebook-ads-scraper"
-        run_url = f"{APIFY_BASE}/acts/{actor_id}/run-sync-get-dataset-items"
 
-        params = {"token": self.token, "timeout": 180}
+        Free-plan accounts cannot use the synchronous run endpoint, so we use
+        the two-step async path: create a run → poll until SUCCEEDED → fetch
+        dataset items.
+        """
+        # ── 1. Create run ───────────────────────────────────────────
+        create_url = f"{APIFY_BASE}/acts/{ACTOR_ID}/runs"
         body = {
             "searchTerms": brand_name,
             "country": country,
@@ -46,7 +52,7 @@ class ApifyProvider:
             "activeStatus": "active",
         }
 
-        resp = requests.post(run_url, params=params, json=body, timeout=200)
+        resp = requests.post(create_url, params={"token": self.token}, json=body, timeout=30)
 
         if resp.status_code == 401:
             raise ApifyError("Invalid APIFY_TOKEN")
@@ -55,10 +61,40 @@ class ApifyProvider:
         if resp.status_code == 402:
             raise ApifyError("Apify credits exhausted")
         if resp.status_code == 404:
-            raise ApifyError(f"Actor '{actor_id}' not found — it may have been renamed or removed")
+            raise ApifyError(f"Actor '{ACTOR_ID}' not found — it may have been renamed or removed")
         resp.raise_for_status()
 
-        data = resp.json()
+        run_data = resp.json().get("data", {})
+        run_id = run_data.get("id")
+        if not run_id:
+            raise ApifyError("Apify run created but no run ID returned")
+
+        # ── 2. Poll for completion ──────────────────────────────────
+        status_url = f"{APIFY_BASE}/actor-runs/{run_id}"
+        elapsed = 0
+        status = run_data.get("status", "READY")
+        while elapsed < MAX_POLL_S:
+            if status in ("SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"):
+                break
+            time.sleep(POLL_INTERVAL_S)
+            elapsed += POLL_INTERVAL_S
+            poll_resp = requests.get(status_url, params={"token": self.token}, timeout=10)
+            poll_resp.raise_for_status()
+            status = poll_resp.json().get("data", {}).get("status", "?")
+
+        if status != "SUCCEEDED":
+            raise ApifyError(f"Apify run {run_id} ended with status={status} after {elapsed}s")
+
+        # ── 3. Fetch dataset items ──────────────────────────────────
+        dataset_id = poll_resp.json().get("data", {}).get("defaultDatasetId", "")
+        if not dataset_id:
+            raise ApifyError(f"Apify run {run_id} succeeded but no datasetId returned")
+
+        dataset_url = f"{APIFY_BASE}/datasets/{dataset_id}/items"
+        ds_resp = requests.get(dataset_url, params={"token": self.token, "limit": max_results}, timeout=30)
+        ds_resp.raise_for_status()
+
+        data = ds_resp.json()
         if isinstance(data, list):
             return data
         return []

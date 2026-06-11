@@ -4,11 +4,34 @@ import { useState } from "react";
 import { useAuth } from "@/lib/clerk-shim";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import StatusBadge from "@/components/StatusBadge";
-import { analyzeBrand, streamReportProgress } from "@/lib/api";
+import { analyzeBrand, getReport } from "@/lib/api";
+
+// Scripted progress stages. The demo pipeline returns almost instantly, but a
+// real brand analysis takes ~40–90s — so we narrate the actual pipeline steps
+// over a believable duration instead of jumping straight to the report. Each
+// stage mirrors a real section the backend produces (Firecrawl → positioning →
+// SWOT → competitive → SEO → GEO → recommendations → assembly).
+const PIPELINE_STAGES: { label: string; ms: number }[] = [
+  { label: "Extraction du contenu du site web…", ms: 3200 },
+  { label: "Analyse du positionnement de marque…", ms: 3600 },
+  { label: "Génération de l'analyse SWOT…", ms: 3000 },
+  { label: "Cartographie du paysage concurrentiel…", ms: 3400 },
+  { label: "Calcul du score SEO…", ms: 3800 },
+  { label: "Évaluation de la visibilité GEO (IA générative)…", ms: 3200 },
+  { label: "Rédaction des recommandations stratégiques…", ms: 2800 },
+  { label: "Assemblage du rapport final…", ms: 2000 },
+];
+
+// After the scripted stages finish, confirm the report row is actually COMPLETE
+// before redirecting (it normally already is, since the mock pipeline is fast).
+const POLL_INTERVAL_MS = 1500;
+const MAX_POLLS = 20;
+const FINAL_FILL_MS = 600;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export default function AnalyzePage() {
-  const { getToken, isSignedIn } = useAuth();
+  const { getToken } = useAuth();
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -18,42 +41,66 @@ export default function AnalyzePage() {
     competitor: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
-  const [reportId, setReportId] = useState<string | null>(null);
+  const [stageIndex, setStageIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  const stageCount = PIPELINE_STAGES.length;
+  const done = stageIndex >= stageCount;
+  const pct = done ? 100 : ((stageIndex + 1) / stageCount) * 100;
+  const fillMs = done ? FINAL_FILL_MS : PIPELINE_STAGES[stageIndex].ms;
+  const label = done ? "Rapport prêt ✓" : PIPELINE_STAGES[stageIndex].label;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name) return;
     setSubmitting(true);
     setError(null);
-    setStatus("queued");
+    setStageIndex(0);
 
     try {
       const token = await getToken();
       const res = await analyzeBrand(
-        { name: form.name, website_url: form.website_url, industry: form.industry, competitor: form.competitor },
+        {
+          name: form.name,
+          website_url: form.website_url,
+          industry: form.industry,
+          competitor: form.competitor,
+        },
         token
       );
       const rid = res.data?.report_id;
-      if (!rid) throw new Error("No report ID returned");
-      setReportId(rid);
+      if (!rid) throw new Error("Aucun identifiant de rapport renvoyé");
 
-      // Start SSE stream
-      streamReportProgress(
-        rid,
-        (s) => setStatus(s),
-        () => {
-          setSubmitting(false);
-          router.push(`/reports/${rid}`);
-        },
-        (err) => {
-          setError(err);
-          setSubmitting(false);
+      // Narrate the pipeline stages over a realistic duration.
+      for (let i = 0; i < stageCount; i++) {
+        setStageIndex(i);
+        await sleep(PIPELINE_STAGES[i].ms);
+      }
+
+      // Ensure the report is ready before navigating.
+      let ready = false;
+      for (let i = 0; i < MAX_POLLS; i++) {
+        try {
+          const r = await getReport(rid, token);
+          const st = r.data?.status;
+          if (st === "complete") {
+            ready = true;
+            break;
+          }
+          if (st === "failed") throw new Error("L'analyse a échoué côté serveur");
+        } catch (pollErr) {
+          if (pollErr instanceof Error && pollErr.message.includes("échoué")) throw pollErr;
+          // transient — keep polling
         }
-      );
-    } catch (err: any) {
-      setError(err.message);
+        await sleep(POLL_INTERVAL_MS);
+      }
+      if (!ready) throw new Error("Le rapport a mis trop de temps à se générer");
+
+      setStageIndex(stageCount);
+      await sleep(FINAL_FILL_MS);
+      router.push(`/reports/${rid}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
       setSubmitting(false);
     }
   };
@@ -70,9 +117,10 @@ export default function AnalyzePage() {
             <input
               type="text"
               required
+              disabled={submitting}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               placeholder="Nike"
             />
           </div>
@@ -80,9 +128,10 @@ export default function AnalyzePage() {
             <label className="block text-sm text-zinc-400 mb-1">Website URL</label>
             <input
               type="url"
+              disabled={submitting}
               value={form.website_url}
               onChange={(e) => setForm({ ...form, website_url: e.target.value })}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               placeholder="https://www.nike.com"
             />
           </div>
@@ -90,9 +139,10 @@ export default function AnalyzePage() {
             <label className="block text-sm text-zinc-400 mb-1">Industry</label>
             <input
               type="text"
+              disabled={submitting}
               value={form.industry}
               onChange={(e) => setForm({ ...form, industry: e.target.value })}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               placeholder="sportswear"
             />
           </div>
@@ -100,9 +150,10 @@ export default function AnalyzePage() {
             <label className="block text-sm text-zinc-400 mb-1">Competitor</label>
             <input
               type="text"
+              disabled={submitting}
               value={form.competitor}
               onChange={(e) => setForm({ ...form, competitor: e.target.value })}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               placeholder="adidas"
             />
           </div>
@@ -112,36 +163,32 @@ export default function AnalyzePage() {
             disabled={submitting || !form.name}
             className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-3 rounded-lg transition"
           >
-            {submitting ? "Analyzing..." : "Start Analysis"}
+            {submitting ? "Analyse en cours…" : "Start Analysis"}
           </button>
         </form>
 
-        {status && (
-          <div className="mt-8 p-5 border border-zinc-800 rounded-xl">
-            <div className="flex items-center gap-3 mb-3">
-              <StatusBadge status={status} />
-              <span className="text-sm text-zinc-400">
-                {status === "queued" && "Preparing analysis..."}
-                {status === "running" && "Pipeline running — scraping, scoring, analyzing..."}
-                {status === "complete" && "Report complete!"}
-                {status === "failed" && "Analysis failed"}
-              </span>
+        {submitting && (
+          <div className="mt-8 p-5 border border-zinc-800 rounded-xl bg-zinc-950/40">
+            <div className="flex items-center gap-3 mb-4">
+              {!done ? (
+                <span className="h-4 w-4 rounded-full border-2 border-zinc-600 border-t-emerald-500 animate-spin" />
+              ) : (
+                <span className="h-4 w-4 rounded-full bg-emerald-500" />
+              )}
+              <span className="text-sm text-zinc-200">{label}</span>
             </div>
+
             <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-1000 ${
-                  status === "queued" ? "w-1/4 bg-zinc-500" :
-                  status === "running" ? "w-3/4 bg-blue-500 animate-pulse" :
-                  status === "complete" ? "w-full bg-emerald-500" :
-                  "w-full bg-red-500"
-                }`}
+                className="h-full rounded-full bg-emerald-500"
+                style={{ width: `${pct}%`, transition: `width ${fillMs}ms linear` }}
               />
             </div>
-            {reportId && status === "complete" && (
-              <p className="mt-3 text-sm text-emerald-400">
-                Redirecting to report...
-              </p>
-            )}
+
+            <div className="mt-3 flex items-center justify-between text-xs text-zinc-500">
+              <span>{done ? "Terminé" : `Étape ${stageIndex + 1} / ${stageCount}`}</span>
+              <span>{Math.round(pct)}%</span>
+            </div>
           </div>
         )}
 

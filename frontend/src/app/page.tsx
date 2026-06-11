@@ -7,7 +7,7 @@ const FEATURES = [
   { title: "Competitive Landscape", desc: "Direct competitors mapped with threat levels. Know who's winning and why." },
   { title: "SWOT Analysis", desc: "Strengths, weaknesses, opportunities, threats — generated from real website content." },
   { title: "Actionable Recommendations", desc: "Quick wins and strategic moves prioritized by impact. Stop guessing." },
-  { title: "Live Progress", desc: "Watch your report build in real-time via SSE streaming. No waiting in the dark." },
+  { title: "Live Progress", desc: "Watch your report build step by step in real-time. No waiting in the dark." },
 ];
 
 export default function Home() {

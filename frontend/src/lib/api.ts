@@ -4,7 +4,6 @@
  */
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-const SSE = process.env.NEXT_PUBLIC_SSE_URL || "http://localhost:8000/sse";
 
 async function fetchAPI(
   path: string,
@@ -99,39 +98,4 @@ export async function createCheckout(
 
 export async function createPortal(token?: string | null) {
   return fetchAPI("/checkout/portal", { method: "POST" }, token);
-}
-
-// ── SSE (not JSON — returns EventSource) ──
-export function streamReportProgress(
-  reportId: string,
-  onStatus: (status: string) => void,
-  onComplete: () => void,
-  onError: (err: string) => void
-) {
-  const url = `${SSE}/reports/${reportId}`;
-  const source = new EventSource(url);
-
-  source.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      onStatus(data.status);
-      if (data.status === "complete" || data.status === "failed") {
-        source.close();
-        onComplete();
-      }
-      if (data.status === "error" || data.status === "timeout") {
-        source.close();
-        onError(data.message || "Unknown error");
-      }
-    } catch {
-      // ignore parse errors
-    }
-  };
-
-  source.onerror = () => {
-    source.close();
-    onError("SSE connection lost");
-  };
-
-  return source;
 }

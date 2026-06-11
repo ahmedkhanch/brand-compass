@@ -24,6 +24,7 @@ function DashboardInner() {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [credits, setCredits] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [upgradeTier, setUpgradeTier] = useState<string | null>(null);
 
   // Auto-upgrade on successful Stripe checkout redirect
@@ -39,22 +40,33 @@ function DashboardInner() {
       };
       upgrade();
     }
-  }, [searchParams, isSignedIn, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, isSignedIn]);
 
   useEffect(() => {
     if (!isSignedIn) return;
+    let cancelled = false;
     const load = async () => {
-      const token = await getToken();
-      const [reportsRes, creditsRes] = await Promise.all([
-        listReports(1, 50, token),
-        getCredits(token).catch(() => ({ data: { balance: "?" } })),
-      ]);
-      setReports(reportsRes.data?.reports || []);
-      setCredits(creditsRes.data?.balance ?? null);
-      setLoading(false);
+      try {
+        const token = await getToken();
+        const [reportsRes, creditsRes] = await Promise.all([
+          listReports(1, 50, token),
+          getCredits(token).catch(() => ({ data: { balance: "?" } })),
+        ]);
+        if (cancelled) return;
+        setReports(reportsRes.data?.reports || []);
+        setCredits(creditsRes.data?.balance ?? null);
+        setError(null);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "Failed to load dashboard");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
     load();
-  }, [isSignedIn, getToken]);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSignedIn]);
 
   if (!isSignedIn) {
     return (
@@ -63,6 +75,32 @@ function DashboardInner() {
         <div className="max-w-lg mx-auto px-4 pt-24 text-center">
           <h1 className="text-2xl font-bold mb-4">{t("dash.signinTitle")}</h1>
           <p className="text-slate-600">{t("dash.signinSub")}</p>
+        </div>
+      </>
+    );
+  }
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 pt-24 flex items-center justify-center text-slate-500">
+          <span className="h-5 w-5 mr-3 rounded-full border-2 border-slate-300 border-t-indigo-500 animate-spin" />
+          {t("r.loading")}
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <div className="max-w-lg mx-auto px-4 pt-24 text-center">
+          <p className="text-rose-500 font-semibold mb-2">{error}</p>
+          <button onClick={() => { setError(null); setLoading(true); }} className="text-sm text-indigo-600 hover:underline">
+            {t("r.retry") || "Retry"}
+          </button>
         </div>
       </>
     );

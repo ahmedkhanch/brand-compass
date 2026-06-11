@@ -4,14 +4,23 @@ import { useState } from "react";
 import StatusChrome from "@/components/StatusChrome";
 
 // ── Real data, derived from git history + SPRINT_1/2/3.md ─────────────────────
-// Project initiated by Ahmed Khanchouch <ahmedkhanchouch95@gmail.com>.
-// Initial push 2026-06-09 15:57→16:05 (4 commits, 119 files, 16 199 insertions).
-// Work spanned 2 days: Sprint 1 (8 juin) then Sprint 2 + 3 (9 juin).
-const AUTHOR = "Ahmed Khanchouch";
+// Two contributors:
+//  • Ahmed Khanchouch <ahmedkhanchouch95@gmail.com> — initiated the project,
+//    Sprint 1 (8 juin) + Sprint 2/3 + initial push (9 juin, 4 commits, 119 files).
+//  • Ousama Ben Younes <benyounes.ousama@gmail.com> — took over (11 juin, 21
+//    commits 08:34→22:23): keyless demo, real providers, UI refonte, roadmap/CR.
+const AHMED = "Ahmed Khanchouch";
+const OUSAMA = "Ousama Ben Younes";
 // 1 June 2026 is a Monday → in a Monday-first grid there are 0 empty cells before day 1.
 const EMPTY_BEFORE = 0;
 const DAYS_IN_JUNE = 30;
 const WEEKDAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+
+// Contributors — Ousama on top, then Ahmed.
+const CONTRIBUTORS = [
+  { name: OUSAMA, role: "Démo keyless · vrais providers · refonte UI · roadmap/CR", days: "11 juin", commits: 21 },
+  { name: AHMED, role: "Initiateur · moteur de scoring · backend + frontend", days: "8-9 juin", commits: 4 },
+];
 
 interface Entry {
   when: string;
@@ -20,8 +29,7 @@ interface Entry {
 }
 interface Day {
   day: number;
-  badge: "full" | "half";
-  badgeLabel: string;
+  author: string;
   title: string;
   meta: string;
   entries: Entry[];
@@ -30,10 +38,9 @@ interface Day {
 const DAYS: Record<number, Day> = {
   8: {
     day: 8,
-    badge: "full",
-    badgeLabel: "complète",
+    author: AHMED,
     title: "Lun. 8 juin — Sprint 1 : Moteur de scoring (CLI)",
-    meta: `${AUTHOR} · Sprint 1 livré · pipeline CLI complet, 7 providers + 3 scorers`,
+    meta: `${AHMED} · Sprint 1 livré · pipeline CLI complet, 7 providers + 3 scorers`,
     entries: [
       {
         when: "Cadrage & architecture",
@@ -74,10 +81,9 @@ const DAYS: Record<number, Day> = {
   },
   9: {
     day: 9,
-    badge: "full",
-    badgeLabel: "complète",
+    author: AHMED,
     title: "Mar. 9 juin — Sprint 2 + 3 : SaaS complet + push GitHub",
-    meta: `${AUTHOR} · push initial 15:57→16:05 · 119 fichiers, 16 199 lignes, 4 commits`,
+    meta: `${AHMED} · push initial 15:57→16:05 · 119 fichiers, 16 199 lignes, 4 commits`,
     entries: [
       {
         when: "Backend — Sprint 2",
@@ -117,15 +123,63 @@ const DAYS: Record<number, Day> = {
       },
     ],
   },
+  11: {
+    day: 11,
+    author: OUSAMA,
+    title: "Jeu. 11 juin — Démo keyless → 4 providers réels → roadmap",
+    meta: `${OUSAMA} · 21 commits · 08:34→22:23 · démo keyless → pipeline 4 providers réels → refonte UI → roadmap/CR`,
+    entries: [
+      {
+        when: "Matin · 08:34→09:59",
+        title: "Mode démo keyless + refonte UI",
+        items: [
+          "DEMO_MODE : mocks déterministes seedés par marque + bypass Clerk → démo sans aucune clé.",
+          "Fix résolution du package app sous pytest (suppression d'un __init__.py parasite).",
+          "Loader de progression réaliste pour l'analyse · rapport premium (charts + parallax) FR/EN, fix hydration.",
+          "Thème clair professionnel sur toute l'app + menu de sections du rapport.",
+        ],
+      },
+      {
+        when: "Midi · 11:07→12:07",
+        title: "Auto-switch des providers + page WIP",
+        items: [
+          "Auto-switch par clé : chaque provider passe en réel dès que sa clé apparaît dans .env.",
+          "GEO : fallback propre vers MockLLM quand aucun moteur réel n'a de clé.",
+          "Fix texte d'input invisible (blanc sur blanc) en thème clair.",
+          "Création de la page d'état /wip (mock → réel, ce qui reste à faire).",
+        ],
+      },
+      {
+        when: "Après-midi · 13:10→14:02",
+        title: "Vrais providers + chasse aux bugs",
+        items: [
+          "Branchement DeepSeek puis SerpAPI : SEO scoring réel (Nike 83/100 sur données Google live).",
+          "Fix spinner infini de la page rapport · fix re-render loop du dashboard (getToken instable).",
+          "Fix suppression de rapport (cascade delete report_costs) · dépôt des fichiers brief + devis.",
+          "Analyse complète mock → réel de chaque provider (sous-agent).",
+        ],
+      },
+      {
+        when: "Soir · 18:49→22:23",
+        title: "Apify (Meta Ads) + roadmap & compte-rendu",
+        items: [
+          "Apify branché : Meta Ads Library réelle → 4e provider réel (pubs Facebook/Instagram).",
+          "Fix du parcours run asynchrone pour le plan gratuit Apify (create → poll → dataset).",
+          "Retrait de Claude de la roadmap (DeepSeek suffit à coût quasi nul).",
+          "Refonte /wip + nouvelle page /cr au format papier (roadmap + compte-rendu cliquable).",
+        ],
+      },
+    ],
+  },
 };
 
 const CRA_DAYS = Object.keys(DAYS).map(Number).sort((a, b) => a - b);
 
 const STATS = [
-  { n: "2", l: "journées de travail" },
-  { n: "119", l: "fichiers produits" },
-  { n: "16 199", l: "lignes de code" },
-  { n: "4", l: "commits (push initial)" },
+  { n: "3", l: "journées de travail" },
+  { n: "2", l: "contributeurs" },
+  { n: "25", l: "commits" },
+  { n: "4 / 7", l: "providers réels" },
 ];
 
 const DELIVERABLES = [
@@ -166,10 +220,15 @@ export default function CompteRenduPage() {
       <div className="summary">
         <h2>📌 Synthèse</h2>
         <p>
-          Projet <strong>initié et construit par {AUTHOR}</strong> sur 2 journées de travail
-          (8-9 juin 2026). De la conception du moteur de scoring (Sprint 1) au SaaS complet —
-          backend FastAPI 18 endpoints (Sprint 2) + frontend Next.js 6 pages (Sprint 3) — déployable
-          et prêt à brancher les vraies clés API.
+          <strong>{OUSAMA}</strong> a repris le projet le 11 juin et l&apos;a mené au{" "}
+          <strong>pipeline 100% réel</strong> : mode démo keyless, branchement des 4 providers
+          (Firecrawl, DeepSeek, SerpAPI, Apify), refonte UI complète, chasse aux bugs et roadmap/CR —
+          21 commits sur la journée (08:34→22:23).
+        </p>
+        <p>
+          Projet <strong>initié par {AHMED}</strong> les 8-9 juin : moteur de scoring (Sprint 1),
+          puis backend FastAPI 18 endpoints + frontend Next.js 6 pages (Sprints 2-3), push initial
+          sur GitHub (119 fichiers, 16 199 lignes).
         </p>
         <div className="stat-row">
           {STATS.map((s) => (
@@ -179,9 +238,19 @@ export default function CompteRenduPage() {
             </div>
           ))}
         </div>
+        <div className="stat-row" style={{ marginTop: 14 }}>
+          {CONTRIBUTORS.map((c) => (
+            <div className="stat" key={c.name} style={{ textAlign: "left" }}>
+              <b>{c.name}</b>
+              <div className="l" style={{ marginTop: 4 }}>
+                {c.days} · {c.commits} commits — {c.role}
+              </div>
+            </div>
+          ))}
+        </div>
         <p style={{ marginTop: 16 }}>
-          📅 <strong>2 journées de travail</strong> condensées, push initial sur GitHub le 9 juin 2026
-          (4 commits, <code>ahmedkhanch</code>). Chiffres tirés de l&apos;historique git réel.
+          📅 <strong>3 journées de travail</strong> sur 2 contributeurs. Chiffres et dates tirés
+          de l&apos;historique git réel (<code>ahmedkhanch</code> + <code>Ousama Ben Younes</code>).
         </p>
       </div>
 
@@ -205,7 +274,7 @@ export default function CompteRenduPage() {
               );
             return (
               <div
-                className={`cal-day has-cra${day.badge === "half" ? " partial" : ""}`}
+                className={`cal-day has-cra${day.author === OUSAMA ? "" : " partial"}`}
                 key={d}
                 onClick={() => setOpenDay(d)}
                 role="button"
@@ -219,13 +288,13 @@ export default function CompteRenduPage() {
         </div>
         <div className="cal-legend">
           <span>
-            <span className="sw full" /> Journée complète (~5-6h)
+            <span className="sw full" /> {OUSAMA} (11 juin)
           </span>
           <span>
-            <span className="sw half" /> Session courte (~1-2h)
+            <span className="sw half" /> {AHMED} (8-9 juin)
           </span>
         </div>
-        <div className="hint-click">👆 Clique un jour bleu pour voir le détail des travaux</div>
+        <div className="hint-click">👆 Clique un jour pour voir le détail des travaux</div>
       </div>
 
       <h2 className="section">📦 Livrables produits ({DELIVERABLES.length})</h2>
@@ -250,7 +319,7 @@ export default function CompteRenduPage() {
           <div className="modal">
             <div className="modal-head">
               <h3>{current.title}</h3>
-              <span className={`day-badge ${current.badge}`}>{current.badgeLabel}</span>
+              <span className="day-badge full">{current.author}</span>
               <button className="modal-close" onClick={() => setOpenDay(null)} aria-label="Fermer">
                 &times;
               </button>

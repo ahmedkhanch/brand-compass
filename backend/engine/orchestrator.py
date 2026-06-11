@@ -15,6 +15,7 @@ Cost Tracking (per README §11): records every provider call's tokens, cost, and
 import os
 import time
 from datetime import datetime, timezone
+from app.config import settings
 from .providers.firecrawl import FirecrawlProvider, FirecrawlError
 from .scorers.positioning import run_prompt_engine
 from .scorers.seo import score_seo
@@ -95,11 +96,11 @@ def run_full_diagnostic(
     website_text = ""
     t0 = time.monotonic()
     try:
-        from .providers.mock import demo_enabled, MockFirecrawl
-        if demo_enabled():
-            firecrawl = MockFirecrawl(brand_name=brand_name, industry=industry)
+        from .providers.mock import provider_ready, MockFirecrawl
+        if provider_ready("FIRECRAWL_API_KEY"):
+            firecrawl = FirecrawlProvider(api_key=settings.FIRECRAWL_API_KEY)
         else:
-            firecrawl = FirecrawlProvider(api_key=firecrawl_key)
+            firecrawl = MockFirecrawl(brand_name=brand_name, industry=industry)
         markdown, metadata = firecrawl.extract_text(website_url)
         website_text = markdown
         report["website_content"] = {
@@ -214,12 +215,12 @@ def run_full_diagnostic(
     # ── 5b. Meta Ads (Apify) — Radar+ tier feature ─────────
     report["meta_ads"] = None
     try:
-        from .providers.mock import demo_enabled, MockApify
-        if demo_enabled():
-            apify = MockApify(brand_name=brand_name)
-        else:
+        from .providers.mock import provider_ready, MockApify
+        if provider_ready("APIFY_TOKEN"):
             from .providers.apify import ApifyProvider, ApifyError
-            apify = ApifyProvider(api_key=os.getenv("APIFY_TOKEN"))
+            apify = ApifyProvider(api_key=settings.APIFY_TOKEN)
+        else:
+            apify = MockApify(brand_name=brand_name)
         t0 = time.monotonic()
         ads = apify.search_meta_ads(brand_name, max_results=20)
         report["meta_ads"] = {

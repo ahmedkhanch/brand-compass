@@ -11,6 +11,7 @@ Formula:
 
 import re
 import os
+from app.config import settings
 from ..providers.serpapi import SerpAPIProvider
 from ..providers.firecrawl import FirecrawlProvider
 
@@ -276,13 +277,15 @@ def score_seo(brand_name: str, website_url: str, industry: str = "",
         }
     """
     brand_domain = _extract_domain(website_url)
-    from .. providers.mock import demo_enabled, MockSerp, MockFirecrawl
-    if demo_enabled():
-        serpapi = MockSerp(brand_name=brand_name, brand_domain=brand_domain)
-        firecrawl = MockFirecrawl(brand_name=brand_name, industry=industry)
+    from .. providers.mock import provider_ready, MockSerp, MockFirecrawl
+    if provider_ready("SERPAPI_KEY"):
+        serpapi = SerpAPIProvider(api_key=settings.SERPAPI_KEY)
     else:
-        serpapi = SerpAPIProvider(api_key=serpapi_key)
-        firecrawl = FirecrawlProvider(api_key=firecrawl_key)
+        serpapi = MockSerp(brand_name=brand_name, brand_domain=brand_domain)
+    if provider_ready("FIRECRAWL_API_KEY"):
+        firecrawl = FirecrawlProvider(api_key=settings.FIRECRAWL_API_KEY)
+    else:
+        firecrawl = MockFirecrawl(brand_name=brand_name, industry=industry)
 
     # ── 1. Brand SERP Ownership (0–35) ──────────────────
     brand_serp = serpapi.search(brand_name, num=10)

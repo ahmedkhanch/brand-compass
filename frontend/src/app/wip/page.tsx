@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const LAST_UPDATED = "2026-06-11";
+const LAST_UPDATED = "2026-06-11 14:30 UTC";
 
 const STATUS = {
   done: { label: "Construit", dot: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
@@ -58,8 +58,8 @@ const API_PROVIDERS: ProviderRow[] = [
     provider: "DeepSeek",
     service: "DeepSeek API",
     envVar: "DEEPSEEK_API_KEY",
-    status: "mock",
-    note: "Fallback ultime si les 3 LLM primaires sont down. Coût: $0.14/$0.28 par 1M tokens",
+    status: "done",
+    note: "Clé réelle configurée — LLM principal pour positionnement, SWOT, concurrence, recommandations + GEO. Coût: $0.14/$0.28 par 1M tokens",
   },
   {
     provider: "SerpAPI",
@@ -144,14 +144,14 @@ const REMAINING: TodoItem[] = [
     priority: "P0",
     dep: "ANTHROPIC_API_KEY",
     effort: "1 minute",
-    effect: "Positionnement, SWOT, concurrence, recommandations + GEO moteur #1 deviennent RÉELS. Plus aucun mock LLM.",
+    effect: "Remplace DeepSeek par Claude pour le LLM principal + GEO moteur #1. Qualité d'analyse supérieure. DeepSeek reste en fallback.",
   },
   {
     task: "Activer SerpAPI",
-    priority: "P1",
+    priority: "P0",
     dep: "SERPAPI_KEY",
     effort: "1 minute",
-    effect: "SEO scoring réel — positions SERP Google, keywords, featured snippets. Impact visible immédiat sur les rapports.",
+    effect: "SEO scoring réel — le SEUL scorer encore en mock. Dernier composant pour un rapport 100% data-driven.",
   },
   {
     task: "Activer Perplexity",
@@ -287,8 +287,6 @@ function DataTable({ headers, children }: { headers: string[]; children: React.R
 export default function WipPage() {
   const doneCount = API_PROVIDERS.filter((p) => p.status === "done").length;
   const mockCount = API_PROVIDERS.filter((p) => p.status === "mock").length;
-  const p0Items = REMAINING.filter((r) => r.priority === "P0");
-  const p1Items = REMAINING.filter((r) => r.priority === "P1");
 
   return (
     <div className="relative min-h-screen text-slate-800">
@@ -339,9 +337,9 @@ export default function WipPage() {
           </div>
 
           <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/70 backdrop-blur p-5 text-sm text-emerald-900">
-            <p className="font-bold text-emerald-800 mb-1">🎯 Statut global : Démo fonctionnelle</p>
+            <p className="font-bold text-emerald-800 mb-1">🎯 Statut global : Démo fonctionnelle — 2 providers réels</p>
             <p className="text-emerald-700 leading-relaxed">
-              Le pipeline complet tourne de bout en bout : un utilisateur entre un nom de marque + URL, le backend lance une analyse en background (scraping Firecrawl réel + LLM mocké), et le frontend affiche un rapport complet avec 8 sections. Le passage en production nécessite uniquement d&apos;activer les clés API listées ci-dessous — <strong>zéro code à écrire.</strong>
+              Le pipeline complet tourne de bout en bout : un utilisateur entre un nom de marque + URL, le backend lance une analyse en background (<strong>scraping Firecrawl réel + LLM DeepSeek réel</strong>), et le frontend affiche un rapport complet avec 8 sections. Seul le SEO reste en mock (en attente de SerpAPI). Les autres providers (Claude, Perplexity, OpenAI) sont prêts à s&apos;activer automatiquement dès que leurs clés sont ajoutées — <strong>zéro code à écrire.</strong>
             </p>
           </div>
         </Section>
@@ -463,27 +461,24 @@ export default function WipPage() {
             <div className="rounded-2xl border border-red-200/60 bg-red-50/70 backdrop-blur p-5">
               <h3 className="font-bold text-red-800 text-sm mb-2 flex items-center gap-1.5">
                 <span className="text-[10px] font-black bg-red-200 text-red-700 px-1.5 py-0.5 rounded">P0</span>
-                {" "}Kickstart : 1 clé = tout débloque
+                {" "}Kickstart : 2 clés = 100% réel
               </h3>
               <p className="text-[13px] text-red-700 leading-relaxed">
-                Activer <strong>ANTHROPIC_API_KEY</strong> fait passer d&apos;un coup tout le pipeline LLM en mode réel
-                (positionnement, SWOT, concurrence, recommandations + GEO moteur Claude). Une seule clé, impact maximum.
-                {p0Items.length > 0 && (
-                  <span className="block mt-2 text-[11px] text-red-600">
-                    Coût estimé : ~0.03€ par rapport en mode économique.
-                  </span>
-                )}
+                <strong>ANTHROPIC_API_KEY</strong> + <strong>SERPAPI_KEY</strong> font passer tout le pipeline en réel.
+                Claude remplace DeepSeek pour la qualité d&apos;analyse, SerpAPI débloque le SEO scoring — le dernier
+                composant encore en mock. DeepSeek reste en fallback automatique.
               </p>
             </div>
 
             <div className="rounded-2xl border border-amber-200/60 bg-amber-50/70 backdrop-blur p-5">
               <h3 className="font-bold text-amber-800 text-sm mb-2 flex items-center gap-1.5">
                 <span className="text-[10px] font-black bg-amber-200 text-amber-700 px-1.5 py-0.5 rounded">P1</span>
-                {" "}Suite : SEO + GEO complets
+                {" "}Suite : GEO multi-moteur
               </h3>
               <p className="text-[13px] text-amber-700 leading-relaxed">
-                {p1Items.map((r) => r.dep).join(" + ")} activent le scoring SEO réel et les 2 autres moteurs GEO
-                (Perplexity + ChatGPT). Le rapport devient 100% data-driven, plus aucun mock.
+                PERPLEXITY_API_KEY + OPENAI_API_KEY activent les 2 autres moteurs GEO
+                (Perplexity + ChatGPT). Le GEO passe de 1 moteur (DeepSeek) à 3 moteurs indépendants
+                pour un score vraiment robuste.
               </p>
             </div>
           </div>

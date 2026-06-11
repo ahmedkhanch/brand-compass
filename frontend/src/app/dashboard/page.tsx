@@ -62,7 +62,7 @@ function DashboardInner() {
         <Navbar />
         <div className="max-w-lg mx-auto px-4 pt-24 text-center">
           <h1 className="text-2xl font-bold mb-4">{t("dash.signinTitle")}</h1>
-          <p className="text-zinc-400">{t("dash.signinSub")}</p>
+          <p className="text-slate-600">{t("dash.signinSub")}</p>
         </div>
       </>
     );
@@ -81,23 +81,23 @@ function DashboardInner() {
           <div>
             <h1 className="text-2xl font-bold">{t("dash.title")}</h1>
             {credits !== null && (
-              <p className="text-sm text-zinc-500">{t("dash.credits", { n: credits })}</p>
+              <p className="text-sm text-slate-500">{t("dash.credits", { n: credits })}</p>
             )}
           </div>
           <Link
             href="/analyze"
-            className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-4 py-2 rounded-lg transition text-sm"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg transition text-sm"
           >
             {t("dash.new")}
           </Link>
         </div>
 
         {loading ? (
-          <p className="text-zinc-500">{t("dash.loading")}</p>
+          <p className="text-slate-500">{t("dash.loading")}</p>
         ) : reports.length === 0 ? (
-          <div className="text-center py-16 border border-zinc-800 rounded-xl">
-            <p className="text-zinc-400 mb-4">{t("dash.empty")}</p>
-            <Link href="/analyze" className="text-emerald-400 hover:underline text-sm">
+          <div className="text-center py-16 border border-slate-200 rounded-xl">
+            <p className="text-slate-600 mb-4">{t("dash.empty")}</p>
+            <Link href="/analyze" className="text-emerald-600 hover:underline text-sm">
               {t("dash.emptyCta")}
             </Link>
           </div>
@@ -107,12 +107,12 @@ function DashboardInner() {
               <Link
                 key={r.id}
                 href={`/reports/${r.id}`}
-                className="block border border-zinc-800 rounded-xl p-5 hover:border-zinc-700 transition"
+                className="block border border-slate-200 rounded-xl p-5 hover:border-slate-300 transition"
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold">{r.brand_name || t("dash.untitled")}</h3>
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-slate-500">
                       {r.created_at ? new Date(r.created_at).toLocaleDateString() : ""}
                     </p>
                   </div>
@@ -120,7 +120,7 @@ function DashboardInner() {
                     {r.scores && (
                       <div className="text-right">
                         <span className="text-lg font-bold">{r.scores.overall}</span>
-                        <span className="text-zinc-500 text-xs">/100</span>
+                        <span className="text-slate-500 text-xs">/100</span>
                       </div>
                     )}
                     <StatusBadge status={r.status} />
@@ -137,7 +137,7 @@ function DashboardInner() {
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 pt-24 text-zinc-500">…</div>}>
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 pt-24 text-slate-500">…</div>}>
       <DashboardInner />
     </Suspense>
   );

@@ -193,10 +193,10 @@ function ParallaxBackdrop() {
     };
   }, []);
   return (
-    <div ref={ref} aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-b from-slate-50 via-indigo-50/70 to-fuchsia-50/50">
-      <div data-depth="0.15" className="absolute -top-24 -left-24"><div className="bc-float h-80 w-80 rounded-full bg-indigo-300/30 blur-3xl" /></div>
-      <div data-depth="0.28" className="absolute top-1/3 -right-28"><div className="bc-float-slow h-96 w-96 rounded-full bg-fuchsia-300/25 blur-3xl" /></div>
-      <div data-depth="0.2" className="absolute bottom-0 left-1/4"><div className="bc-float h-72 w-72 rounded-full bg-emerald-300/25 blur-3xl" /></div>
+    <div ref={ref} aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-b from-white via-white to-indigo-50/40">
+      <div data-depth="0.15" className="absolute -top-24 -left-24"><div className="bc-float h-80 w-80 rounded-full bg-indigo-200/25 blur-3xl" /></div>
+      <div data-depth="0.28" className="absolute top-1/3 -right-28"><div className="bc-float-slow h-96 w-96 rounded-full bg-fuchsia-200/20 blur-3xl" /></div>
+      <div data-depth="0.2" className="absolute bottom-0 left-1/4"><div className="bc-float h-72 w-72 rounded-full bg-sky-200/20 blur-3xl" /></div>
       <div data-depth="0.4" className="absolute top-20 right-[6%] opacity-[0.07]"><div className="bc-spin-slow"><CompassRose size={460} /></div></div>
       <Glyph depth="0.55" className="top-[18%] left-[11%]" label="Aa" />
       <Glyph depth="0.7" className="top-[55%] left-[7%]" label="#" />
@@ -213,12 +213,29 @@ function ParallaxBackdrop() {
 }
 
 // ── Layout primitives ──────────────────────────────────────────────
-function Card({ title, children }: { title?: string; children: React.ReactNode }) {
+function Card({ title, children, id }: { title?: string; children: React.ReactNode; id?: string }) {
   return (
-    <section className="rounded-3xl border border-white/70 bg-white/75 backdrop-blur-xl shadow-[0_14px_50px_-18px_rgba(30,41,59,0.35)] p-6 sm:p-8">
+    <section id={id} className="scroll-mt-32 rounded-3xl border border-white/70 bg-white/85 backdrop-blur-xl shadow-[0_14px_50px_-18px_rgba(30,41,59,0.35)] p-6 sm:p-8">
       {title && <h2 className="text-lg font-bold text-slate-900 mb-5">{title}</h2>}
       {children}
     </section>
+  );
+}
+
+// Sticky in-page menu: jump to a section. Labels reuse the existing sec.* i18n keys.
+function SectionNav({ items, t }: { items: { id: string; label: string }[]; t: (k: string) => string }) {
+  if (items.length === 0) return null;
+  return (
+    <nav aria-label={t("r.menu")} className="sticky top-14 z-30 border-b border-white/60 bg-white/70 backdrop-blur-xl">
+      <div className="max-w-5xl mx-auto px-4 py-2 flex gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {items.map((s) => (
+          <a key={s.id} href={`#${s.id}`}
+             className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 bg-white/80 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition">
+            {s.label}
+          </a>
+        ))}
+      </div>
+    </nav>
   );
 }
 
@@ -327,6 +344,15 @@ export default function ReportPage() {
     weeks: "bg-amber-100 text-amber-700 border-amber-200",
   };
 
+  const navItems = ([
+    p.positioning && !p.positioning.error && { id: "positioning", label: t("sec.positioning") },
+    p.swot && !p.swot.error && { id: "swot", label: t("sec.swot") },
+    p.competitive && !p.competitive.error && { id: "competitive", label: t("sec.competitive") },
+    ((p.seo && !p.seo.error) || (p.geo && !p.geo.error)) && { id: "scores", label: `${t("sec.seo")} · ${t("sec.geo")}` },
+    p.recommendations && !p.recommendations.error && { id: "reco", label: t("sec.reco") },
+    { id: "metaads", label: t("sec.metaads") },
+  ].filter(Boolean)) as { id: string; label: string }[];
+
   return (
     <div className="relative min-h-screen text-slate-800">
       <ParallaxBackdrop />
@@ -344,10 +370,12 @@ export default function ReportPage() {
         </div>
       </header>
 
+      <SectionNav items={navItems} t={t} />
+
       <main className="relative z-0 max-w-5xl mx-auto px-4 py-10 space-y-7">
         {/* Hero */}
         <Reveal>
-          <section className="rounded-3xl border border-white/70 bg-white/75 backdrop-blur-xl shadow-[0_20px_60px_-20px_rgba(30,41,59,0.4)] p-6 sm:p-10">
+          <section className="rounded-3xl border border-white/70 bg-white/85 backdrop-blur-xl shadow-[0_20px_60px_-20px_rgba(30,41,59,0.4)] p-6 sm:p-10">
             <div className="flex flex-col md:flex-row md:items-center gap-8">
               <div className="flex-1">
                 <p className="text-[11px] font-bold tracking-[0.18em] text-indigo-500 mb-3">{t("r.eyebrow")}</p>
@@ -389,7 +417,7 @@ export default function ReportPage() {
         {/* Positioning */}
         {p.positioning && !p.positioning.error && (
           <Reveal>
-            <Card title={t("sec.positioning")}>
+            <Card id="positioning" title={t("sec.positioning")}>
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
                   <InfoRow label={t("pos.archetype")} value={p.positioning.archetype} />
@@ -422,7 +450,7 @@ export default function ReportPage() {
         {/* SWOT */}
         {p.swot && !p.swot.error && (
           <Reveal>
-            <Card title={t("sec.swot")}>
+            <Card id="swot" title={t("sec.swot")}>
               {p.swot.executive_summary && (
                 <p className="text-sm text-slate-500 italic mb-5">{p.swot.executive_summary}</p>
               )}
@@ -450,7 +478,7 @@ export default function ReportPage() {
         {/* Competitive */}
         {p.competitive && !p.competitive.error && (
           <Reveal>
-            <Card title={t("sec.competitive")}>
+            <Card id="competitive" title={t("sec.competitive")}>
               <div className="grid sm:grid-cols-2 gap-3 mb-5">
                 <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4">
                   <span className="text-xs font-semibold text-slate-400">{t("comp.differentiator")}</span>
@@ -484,7 +512,7 @@ export default function ReportPage() {
         )}
 
         {/* SEO + GEO */}
-        <div className="grid md:grid-cols-2 gap-7">
+        <div id="scores" className="scroll-mt-32 grid md:grid-cols-2 gap-7">
           {p.seo && !p.seo.error && (
             <Reveal>
               <Card title={`${t("sec.seo")} — ${p.seo.label}`}>
@@ -518,7 +546,7 @@ export default function ReportPage() {
         {/* Recommendations */}
         {p.recommendations && !p.recommendations.error && (
           <Reveal>
-            <Card title={t("sec.reco")}>
+            <Card id="reco" title={t("sec.reco")}>
               {p.recommendations.priority_focus && (
                 <div className="rounded-2xl bg-gradient-to-r from-indigo-50 to-fuchsia-50 border border-indigo-100 p-4 mb-5">
                   <span className="text-xs font-bold text-indigo-500 uppercase tracking-wide">{t("reco.priority")}</span>
@@ -562,22 +590,20 @@ export default function ReportPage() {
 
         {/* Meta Ads — gated */}
         <Reveal>
-          <Card title={t("sec.metaads")}>
+          <Card id="metaads" title={t("sec.metaads")}>
             {tier === "boussole" ? (
-              <div className="relative overflow-hidden rounded-2xl">
-                <div className="blur-sm pointer-events-none opacity-60 p-2">
-                  <p className="text-slate-500">{t("meta.locked")}</p>
-                  <p className="text-slate-400 text-sm mt-1">{t("meta.lockedSub")}</p>
+              <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-fuchsia-50 p-6 sm:p-8 text-center">
+                <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-white grid place-items-center shadow ring-1 ring-indigo-100">
+                  <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0-1.105.895-2 2-2s2 .895 2 2m-9 0h10a2 2 0 012 2v5a2 2 0 01-2 2H7a2 2 0 01-2-2v-5a2 2 0 012-2zm5-4V6a3 3 0 016 0v1" />
+                  </svg>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200 shadow-lg">
-                    <p className="text-lg font-bold text-slate-900 mb-1">{t("meta.upgradeTitle")}</p>
-                    <p className="text-sm text-slate-500 mb-3">{t("meta.upgradePrice")}</p>
-                    <Link href="/pricing" className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
-                      {t("meta.upgradeNow")}
-                    </Link>
-                  </div>
-                </div>
+                <p className="text-slate-800 font-semibold">{t("meta.locked")}</p>
+                <p className="text-slate-600 text-sm mt-1 max-w-md mx-auto">{t("meta.lockedSub")}</p>
+                <Link href="/pricing" className="mt-5 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                  {t("meta.upgradeNow")} — {t("meta.upgradeTitle")}
+                </Link>
+                <p className="text-xs text-slate-500 mt-2">{t("meta.upgradePrice")}</p>
               </div>
             ) : metaAds?.meta_ads && typeof metaAds.meta_ads === "object" ? (
               <div className="space-y-3">

@@ -59,7 +59,7 @@ export default function PricingPage() {
       <main className="max-w-5xl mx-auto px-4 pt-12 pb-16">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-2">{t("price.title")}</h1>
-          <p className="text-zinc-400">{t("price.subtitle")}</p>
+          <p className="text-slate-600">{t("price.subtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -69,23 +69,23 @@ export default function PricingPage() {
               className={`border rounded-xl p-6 flex flex-col ${
                 tier.highlighted
                   ? "border-emerald-600 bg-emerald-950/20"
-                  : "border-zinc-800"
+                  : "border-slate-200"
               }`}
             >
               {tier.highlighted && (
-                <div className="text-xs text-emerald-400 font-semibold mb-2">{t("price.popular")}</div>
+                <div className="text-xs text-emerald-600 font-semibold mb-2">{t("price.popular")}</div>
               )}
               <h3 className="text-xl font-bold">{tier.name}</h3>
               <div className="mt-2 mb-4">
                 <span className="text-3xl font-bold">{tier.price}</span>
-                <span className="text-zinc-500">{t("price.perMonth")}</span>
+                <span className="text-slate-500">{t("price.perMonth")}</span>
               </div>
-              <p className="text-sm text-zinc-400 mb-4">{t("price.reports", { n: tier.reports })}</p>
+              <p className="text-sm text-slate-600 mb-4">{t("price.reports", { n: tier.reports })}</p>
               <ul className="space-y-2 mb-6 flex-1">
                 {tier.featureKeys.map((fk) => (
                   <li key={fk} className="text-sm flex items-center gap-2">
-                    <span className="text-emerald-400">✓</span>
-                    <span className="text-zinc-300">{t(fk)}</span>
+                    <span className="text-emerald-600">✓</span>
+                    <span className="text-slate-700">{t(fk)}</span>
                   </li>
                 ))}
               </ul>
@@ -94,8 +94,8 @@ export default function PricingPage() {
                 disabled={loading === tier.priceId || !isSignedIn}
                 className={`w-full py-2.5 rounded-lg font-semibold text-sm transition ${
                   tier.highlighted
-                    ? "bg-emerald-500 hover:bg-emerald-400 text-black"
-                    : "border border-zinc-600 hover:border-zinc-400 text-zinc-200"
+                    ? "bg-indigo-600 hover:bg-indigo-500 text-white"
+                    : "border border-slate-300 hover:border-slate-300 text-slate-800"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {loading === tier.priceId ? t("price.redirecting") : isSignedIn ? t("price.upgrade") : t("price.signinUpgrade")}

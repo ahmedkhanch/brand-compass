@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <AuthProvider>
       <html lang="fr">
-        <body className="min-h-screen bg-zinc-950 text-zinc-100 antialiased">
+        <body className="min-h-screen bg-transparent text-slate-900 antialiased">
           <I18nProvider>{children}</I18nProvider>
         </body>
       </html>

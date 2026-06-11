@@ -149,6 +149,7 @@ const MESSAGES: Record<string, Entry> = {
   "r.eyebrow": { fr: "BRAND COMPASS · RAPPORT DE DIAGNOSTIC", en: "BRAND COMPASS · DIAGNOSTIC REPORT" },
   "r.titleSuffix": { fr: "Rapport d'intelligence de marque", en: "Brand Intelligence Report" },
   "r.back": { fr: "Retour", en: "Back" },
+  "r.menu": { fr: "Aller à la section", en: "Jump to section" },
   "r.overall": { fr: "Score global", en: "Overall score" },
   "r.industry": { fr: "Secteur", en: "Industry" },
   "r.marketPosition": { fr: "Position marché", en: "Market position" },

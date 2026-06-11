@@ -117,47 +117,47 @@ export default function AnalyzePage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-zinc-400 mb-1">{t("an.brand")}</label>
+            <label className="block text-sm text-slate-600 mb-1">{t("an.brand")}</label>
             <input
               type="text"
               required
               disabled={submitting}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               placeholder="Nike"
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1">{t("an.website")}</label>
+            <label className="block text-sm text-slate-600 mb-1">{t("an.website")}</label>
             <input
               type="url"
               disabled={submitting}
               value={form.website_url}
               onChange={(e) => setForm({ ...form, website_url: e.target.value })}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               placeholder="https://www.nike.com"
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1">{t("an.industry")}</label>
+            <label className="block text-sm text-slate-600 mb-1">{t("an.industry")}</label>
             <input
               type="text"
               disabled={submitting}
               value={form.industry}
               onChange={(e) => setForm({ ...form, industry: e.target.value })}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               placeholder="sportswear"
             />
           </div>
           <div>
-            <label className="block text-sm text-zinc-400 mb-1">{t("an.competitor")}</label>
+            <label className="block text-sm text-slate-600 mb-1">{t("an.competitor")}</label>
             <input
               type="text"
               disabled={submitting}
               value={form.competitor}
               onChange={(e) => setForm({ ...form, competitor: e.target.value })}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               placeholder="adidas"
             />
           </div>
@@ -165,31 +165,31 @@ export default function AnalyzePage() {
           <button
             type="submit"
             disabled={submitting || !form.name}
-            className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-3 rounded-lg transition"
+            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition"
           >
             {submitting ? t("an.running") : t("an.start")}
           </button>
         </form>
 
         {submitting && (
-          <div className="mt-8 p-5 border border-zinc-800 rounded-xl bg-zinc-950/40">
+          <div className="mt-8 p-5 border border-slate-200 rounded-xl bg-white/60">
             <div className="flex items-center gap-3 mb-4">
               {!done ? (
-                <span className="h-4 w-4 rounded-full border-2 border-zinc-600 border-t-emerald-500 animate-spin" />
+                <span className="h-4 w-4 rounded-full border-2 border-slate-300 border-t-emerald-500 animate-spin" />
               ) : (
                 <span className="h-4 w-4 rounded-full bg-emerald-500" />
               )}
-              <span className="text-sm text-zinc-200">{label}</span>
+              <span className="text-sm text-slate-800">{label}</span>
             </div>
 
-            <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full bg-emerald-500"
                 style={{ width: `${pct}%`, transition: `width ${fillMs}ms linear` }}
               />
             </div>
 
-            <div className="mt-3 flex items-center justify-between text-xs text-zinc-500">
+            <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
               <span>{done ? t("an.doneShort") : t("an.step", { i: stageIndex + 1, n: stageCount })}</span>
               <span>{Math.round(pct)}%</span>
             </div>

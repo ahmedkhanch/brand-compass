@@ -34,13 +34,6 @@ const API_PROVIDERS: ProviderRow[] = [
     note: "Clé réelle configurée — scraping live",
   },
   {
-    provider: "Claude (Anthropic)",
-    service: "Anthropic API",
-    envVar: "ANTHROPIC_API_KEY",
-    status: "mock",
-    note: "Positionnement, SWOT, concurrence, recommandations + GEO moteur #1. Coût: ~$3/$15 par 1M tokens",
-  },
-  {
     provider: "Perplexity",
     service: "Perplexity API",
     envVar: "PERPLEXITY_API_KEY",
@@ -139,13 +132,6 @@ interface TodoItem {
 }
 
 const REMAINING: TodoItem[] = [
-  {
-    task: "Activer Anthropic (Claude Sonnet 4.5)",
-    priority: "P0",
-    dep: "ANTHROPIC_API_KEY",
-    effort: "1 minute",
-    effect: "Remplace DeepSeek par Claude pour le LLM principal + GEO moteur #1. Qualité d'analyse supérieure. DeepSeek reste en fallback automatique.",
-  },
   {
     task: "Activer Perplexity",
     priority: "P1",
@@ -325,7 +311,7 @@ export default function WipPage() {
           <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/70 backdrop-blur p-5 text-sm text-emerald-900">
             <p className="font-bold text-emerald-800 mb-1">🎯 Statut global : 4 providers réels — Pipeline complet</p>
             <p className="text-emerald-700 leading-relaxed">
-              Le pipeline est <strong>100% data-driven</strong> : scraping Firecrawl réel → analyse DeepSeek réelle → scoring SEO SerpAPI réel → Meta Ads Apify réel. Les 4 piliers (contenu, LLM, SEO, paid media) tournent en production. Reste à activer Claude pour upgrader la qualité d&apos;analyse et Perplexity/OpenAI pour le GEO multi-moteur. <strong>Zéro code à écrire</strong> — tout s&apos;active par clé API.
+              Le pipeline est <strong>100% data-driven</strong> : scraping Firecrawl réel → analyse DeepSeek réelle → scoring SEO SerpAPI réel → Meta Ads Apify réel. Les 4 piliers (contenu, LLM, SEO, paid media) tournent en production. Reste à activer Perplexity/OpenAI pour le GEO multi-moteur. <strong>Zéro code à écrire</strong> — tout s&apos;active par clé API.
             </p>
           </div>
         </Section>
@@ -453,18 +439,6 @@ export default function WipPage() {
                 Firecrawl (scraping) + DeepSeek (LLM) + SerpAPI (SEO) + Apify (Meta Ads) = les 4 piliers sont en production.
                 Un rapport complet est généré en ~15s avec des données réelles de bout en bout, pubs Facebook/Instagram incluses.
                 Coût par rapport : ~0¢ (free tiers Firecrawl + DeepSeek + SerpAPI + Apify).
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-red-200/60 bg-red-50/70 backdrop-blur p-5">
-              <h3 className="font-bold text-red-800 text-sm mb-2 flex items-center gap-1.5">
-                <span className="text-[10px] font-black bg-red-200 text-red-700 px-1.5 py-0.5 rounded">P0</span>
-                {" "}Prochaine étape : Claude
-              </h3>
-              <p className="text-[13px] text-red-700 leading-relaxed">
-                <strong>ANTHROPIC_API_KEY</strong> — une seule clé pour upgrader la qualité LLM (Claude Sonnet 4.5
-                remplace DeepSeek pour le positionnement, SWOT, concurrence, recommandations + GEO moteur #1).
-                DeepSeek reste en fallback automatique si Claude est down.
               </p>
             </div>
 

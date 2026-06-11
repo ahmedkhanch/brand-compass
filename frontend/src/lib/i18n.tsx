@@ -25,7 +25,6 @@ const MESSAGES: Record<string, Entry> = {
   // ── Navbar ──
   "nav.dashboard": { fr: "Tableau de bord", en: "Dashboard" },
   "nav.pricing": { fr: "Tarifs", en: "Pricing" },
-  "nav.wip": { fr: "État du projet", en: "Project status" },
   "nav.signin": { fr: "Se connecter", en: "Sign In" },
   "nav.getstarted": { fr: "Commencer", en: "Get Started" },
 

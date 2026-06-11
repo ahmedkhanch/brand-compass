@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const LAST_UPDATED = "2026-06-11 15:00 UTC";
+const LAST_UPDATED = "2026-06-11 18:45 UTC";
 
 const STATUS = {
   done: { label: "Construit", dot: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
@@ -72,8 +72,8 @@ const API_PROVIDERS: ProviderRow[] = [
     provider: "Apify",
     service: "Apify (Meta Ads Library)",
     envVar: "APIFY_TOKEN",
-    status: "mock",
-    note: "Bibliothèque Meta Ads (Radar+). Pay-per-result",
+    status: "done",
+    note: "Clé réelle configurée — Meta Ads live pour Radar+. Compte natty_poster, plan Free. Pay-per-result.",
   },
 ];
 
@@ -108,7 +108,7 @@ const BACKEND_ENDPOINTS: BackendRow[] = [
   { endpoint: "/api/v1/reports", method: "GET", label: "Liste des rapports", status: "done", note: "Paginée, scopée par user" },
   { endpoint: "/api/v1/reports/{id}", method: "GET", label: "Détail d'un rapport", status: "done", note: "Toutes les sections du diagnostic" },
   { endpoint: "/api/v1/reports/{id}", method: "DELETE", label: "Supprimer un rapport", status: "done", note: "" },
-  { endpoint: "/api/v1/reports/{id}/meta-ads", method: "GET", label: "Données Meta Ads", status: "mock", note: "Mock tant que APIFY_TOKEN absent" },
+  { endpoint: "/api/v1/reports/{id}/meta-ads", method: "GET", label: "Données Meta Ads", status: "done", note: "Live — data réelle depuis Apify Facebook Ads Library" },
   { endpoint: "/sse/reports/{id}", method: "GET", label: "Progression live (SSE)", status: "done", note: "Polling DB pour status changes" },
   { endpoint: "/api/v1/credits", method: "GET", label: "Solde de crédits", status: "done", note: "" },
   { endpoint: "/api/v1/subscription", method: "GET", label: "Abonnement actuel", status: "done", note: "" },
@@ -173,13 +173,6 @@ const REMAINING: TodoItem[] = [
     dep: "CLERK_SECRET_KEY + CLERK_JWT_ISSUER",
     effort: "5 minutes",
     effect: "Auth réelle — remplacer les tokens dev-user-*. Multi-user réel.",
-  },
-  {
-    task: "Activer Apify (Meta Ads)",
-    priority: "P2",
-    dep: "APIFY_TOKEN",
-    effort: "1 minute",
-    effect: "Données Meta Ads réelles pour le tier Radar+. Fonctionnalité premium débloquée.",
   },
   {
     task: "Activer Redis + ARQ",
@@ -330,9 +323,9 @@ export default function WipPage() {
           </div>
 
           <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/70 backdrop-blur p-5 text-sm text-emerald-900">
-            <p className="font-bold text-emerald-800 mb-1">🎯 Statut global : 3 providers réels — Pipeline quasi-complet</p>
+            <p className="font-bold text-emerald-800 mb-1">🎯 Statut global : 4 providers réels — Pipeline complet</p>
             <p className="text-emerald-700 leading-relaxed">
-              Le pipeline est <strong>100% data-driven</strong> : scraping Firecrawl réel → analyse DeepSeek réelle → scoring SEO SerpAPI réel. Les 3 piliers (contenu, LLM, SEO) tournent en production. Reste à activer Claude pour upgrader la qualité d&apos;analyse et Perplexity/OpenAI pour le GEO multi-moteur. <strong>Zéro code à écrire</strong> — tout s&apos;active par clé API.
+              Le pipeline est <strong>100% data-driven</strong> : scraping Firecrawl réel → analyse DeepSeek réelle → scoring SEO SerpAPI réel → Meta Ads Apify réel. Les 4 piliers (contenu, LLM, SEO, paid media) tournent en production. Reste à activer Claude pour upgrader la qualité d&apos;analyse et Perplexity/OpenAI pour le GEO multi-moteur. <strong>Zéro code à écrire</strong> — tout s&apos;active par clé API.
             </p>
           </div>
         </Section>
@@ -457,9 +450,9 @@ export default function WipPage() {
                 {" "}Pipeline core 100% réel
               </h3>
               <p className="text-[13px] text-emerald-700 leading-relaxed">
-                Firecrawl (scraping) + DeepSeek (LLM) + SerpAPI (SEO) = les 3 piliers du diagnostic sont en production.
-                Un rapport complet est généré en ~12s avec des données réelles de bout en bout.
-                Coût par rapport : ~0¢ (free tiers Firecrawl + DeepSeek + SerpAPI).
+                Firecrawl (scraping) + DeepSeek (LLM) + SerpAPI (SEO) + Apify (Meta Ads) = les 4 piliers sont en production.
+                Un rapport complet est généré en ~15s avec des données réelles de bout en bout, pubs Facebook/Instagram incluses.
+                Coût par rapport : ~0¢ (free tiers Firecrawl + DeepSeek + SerpAPI + Apify).
               </p>
             </div>
 

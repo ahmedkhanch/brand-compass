@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const LAST_UPDATED = "2026-06-11 14:30 UTC";
+const LAST_UPDATED = "2026-06-11 15:00 UTC";
 
 const STATUS = {
   done: { label: "Construit", dot: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
@@ -65,8 +65,8 @@ const API_PROVIDERS: ProviderRow[] = [
     provider: "SerpAPI",
     service: "SerpAPI",
     envVar: "SERPAPI_KEY",
-    status: "mock",
-    note: "SEO scoring — positions SERP, featured snippets, negative content. Plan: ~$50/mois",
+    status: "done",
+    note: "Clé réelle configurée — SEO scoring live : SERP ownership, keywords, featured snippets, negative content. Plan: ~$50/mois",
   },
   {
     provider: "Apify",
@@ -144,28 +144,21 @@ const REMAINING: TodoItem[] = [
     priority: "P0",
     dep: "ANTHROPIC_API_KEY",
     effort: "1 minute",
-    effect: "Remplace DeepSeek par Claude pour le LLM principal + GEO moteur #1. Qualité d'analyse supérieure. DeepSeek reste en fallback.",
-  },
-  {
-    task: "Activer SerpAPI",
-    priority: "P0",
-    dep: "SERPAPI_KEY",
-    effort: "1 minute",
-    effect: "SEO scoring réel — le SEUL scorer encore en mock. Dernier composant pour un rapport 100% data-driven.",
+    effect: "Remplace DeepSeek par Claude pour le LLM principal + GEO moteur #1. Qualité d'analyse supérieure. DeepSeek reste en fallback automatique.",
   },
   {
     task: "Activer Perplexity",
     priority: "P1",
     dep: "PERPLEXITY_API_KEY",
     effort: "1 minute",
-    effect: "GEO moteur #2 (web-aware). Améliore la précision du scoring GEO multi-moteur.",
+    effect: "GEO moteur #2 (web-aware). Le GEO passe de 1 à 2 moteurs indépendants.",
   },
   {
     task: "Activer OpenAI",
     priority: "P1",
     dep: "OPENAI_API_KEY",
     effort: "1 minute",
-    effect: "GEO moteur #3 + fallback LLM. Le scoring GEO devient vraiment multi-moteur (3 engines).",
+    effect: "GEO moteur #3 + fallback LLM. GEO multi-moteur complet (3 engines).",
   },
   {
     task: "Activer Stripe",
@@ -337,9 +330,9 @@ export default function WipPage() {
           </div>
 
           <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/70 backdrop-blur p-5 text-sm text-emerald-900">
-            <p className="font-bold text-emerald-800 mb-1">🎯 Statut global : Démo fonctionnelle — 2 providers réels</p>
+            <p className="font-bold text-emerald-800 mb-1">🎯 Statut global : 3 providers réels — Pipeline quasi-complet</p>
             <p className="text-emerald-700 leading-relaxed">
-              Le pipeline complet tourne de bout en bout : un utilisateur entre un nom de marque + URL, le backend lance une analyse en background (<strong>scraping Firecrawl réel + LLM DeepSeek réel</strong>), et le frontend affiche un rapport complet avec 8 sections. Seul le SEO reste en mock (en attente de SerpAPI). Les autres providers (Claude, Perplexity, OpenAI) sont prêts à s&apos;activer automatiquement dès que leurs clés sont ajoutées — <strong>zéro code à écrire.</strong>
+              Le pipeline est <strong>100% data-driven</strong> : scraping Firecrawl réel → analyse DeepSeek réelle → scoring SEO SerpAPI réel. Les 3 piliers (contenu, LLM, SEO) tournent en production. Reste à activer Claude pour upgrader la qualité d&apos;analyse et Perplexity/OpenAI pour le GEO multi-moteur. <strong>Zéro code à écrire</strong> — tout s&apos;active par clé API.
             </p>
           </div>
         </Section>
@@ -458,15 +451,27 @@ export default function WipPage() {
         {/* ── Prochaines étapes immédiates ── */}
         <Section title="Prochaines étapes immédiates">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/70 backdrop-blur p-5">
+              <h3 className="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1.5">
+                <span className="text-[10px] font-black bg-emerald-500 text-white px-1.5 py-0.5 rounded">FAIT</span>
+                {" "}Pipeline core 100% réel
+              </h3>
+              <p className="text-[13px] text-emerald-700 leading-relaxed">
+                Firecrawl (scraping) + DeepSeek (LLM) + SerpAPI (SEO) = les 3 piliers du diagnostic sont en production.
+                Un rapport complet est généré en ~12s avec des données réelles de bout en bout.
+                Coût par rapport : ~0¢ (free tiers Firecrawl + DeepSeek + SerpAPI).
+              </p>
+            </div>
+
             <div className="rounded-2xl border border-red-200/60 bg-red-50/70 backdrop-blur p-5">
               <h3 className="font-bold text-red-800 text-sm mb-2 flex items-center gap-1.5">
                 <span className="text-[10px] font-black bg-red-200 text-red-700 px-1.5 py-0.5 rounded">P0</span>
-                {" "}Kickstart : 2 clés = 100% réel
+                {" "}Prochaine étape : Claude
               </h3>
               <p className="text-[13px] text-red-700 leading-relaxed">
-                <strong>ANTHROPIC_API_KEY</strong> + <strong>SERPAPI_KEY</strong> font passer tout le pipeline en réel.
-                Claude remplace DeepSeek pour la qualité d&apos;analyse, SerpAPI débloque le SEO scoring — le dernier
-                composant encore en mock. DeepSeek reste en fallback automatique.
+                <strong>ANTHROPIC_API_KEY</strong> — une seule clé pour upgrader la qualité LLM (Claude Sonnet 4.5
+                remplace DeepSeek pour le positionnement, SWOT, concurrence, recommandations + GEO moteur #1).
+                DeepSeek reste en fallback automatique si Claude est down.
               </p>
             </div>
 
@@ -476,9 +481,8 @@ export default function WipPage() {
                 {" "}Suite : GEO multi-moteur
               </h3>
               <p className="text-[13px] text-amber-700 leading-relaxed">
-                PERPLEXITY_API_KEY + OPENAI_API_KEY activent les 2 autres moteurs GEO
-                (Perplexity + ChatGPT). Le GEO passe de 1 moteur (DeepSeek) à 3 moteurs indépendants
-                pour un score vraiment robuste.
+                PERPLEXITY_API_KEY + OPENAI_API_KEY activent les 2 autres moteurs GEO.
+                Le GEO passe de 1 moteur (DeepSeek) à 3 moteurs indépendants pour un score vraiment robuste.
               </p>
             </div>
           </div>

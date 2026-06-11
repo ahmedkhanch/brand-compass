@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useAuth } from "@/lib/clerk-shim";
+import { useI18n } from "@/lib/i18n";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -18,11 +19,12 @@ interface ReportItem {
 
 function DashboardInner() {
   const { getToken, isSignedIn } = useAuth();
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [credits, setCredits] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [upgradeMsg, setUpgradeMsg] = useState<string | null>(null);
+  const [upgradeTier, setUpgradeTier] = useState<string | null>(null);
 
   // Auto-upgrade on successful Stripe checkout redirect
   useEffect(() => {
@@ -32,7 +34,7 @@ function DashboardInner() {
       const upgrade = async () => {
         const token = await getToken();
         await upgradeSubscription(tier, token);
-        setUpgradeMsg(`Successfully upgraded to ${tier}!`);
+        setUpgradeTier(tier);
         window.history.replaceState({}, "", "/dashboard");
       };
       upgrade();
@@ -59,8 +61,8 @@ function DashboardInner() {
       <>
         <Navbar />
         <div className="max-w-lg mx-auto px-4 pt-24 text-center">
-          <h1 className="text-2xl font-bold mb-4">Sign in to view your dashboard</h1>
-          <p className="text-zinc-400">Create an account to start analyzing brands.</p>
+          <h1 className="text-2xl font-bold mb-4">{t("dash.signinTitle")}</h1>
+          <p className="text-zinc-400">{t("dash.signinSub")}</p>
         </div>
       </>
     );
@@ -70,33 +72,33 @@ function DashboardInner() {
     <>
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 pt-8 pb-16">
-        {upgradeMsg && (
+        {upgradeTier && (
           <div className="mb-6 p-4 border border-emerald-700 bg-emerald-950/30 rounded-lg text-emerald-300 text-sm">
-            {upgradeMsg}
+            {t("dash.upgraded", { tier: upgradeTier })}
           </div>
         )}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <h1 className="text-2xl font-bold">{t("dash.title")}</h1>
             {credits !== null && (
-              <p className="text-sm text-zinc-500">{credits} credits remaining</p>
+              <p className="text-sm text-zinc-500">{t("dash.credits", { n: credits })}</p>
             )}
           </div>
           <Link
             href="/analyze"
             className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-4 py-2 rounded-lg transition text-sm"
           >
-            + New Analysis
+            {t("dash.new")}
           </Link>
         </div>
 
         {loading ? (
-          <p className="text-zinc-500">Loading reports...</p>
+          <p className="text-zinc-500">{t("dash.loading")}</p>
         ) : reports.length === 0 ? (
           <div className="text-center py-16 border border-zinc-800 rounded-xl">
-            <p className="text-zinc-400 mb-4">No reports yet</p>
+            <p className="text-zinc-400 mb-4">{t("dash.empty")}</p>
             <Link href="/analyze" className="text-emerald-400 hover:underline text-sm">
-              Run your first brand analysis →
+              {t("dash.emptyCta")}
             </Link>
           </div>
         ) : (
@@ -109,7 +111,7 @@ function DashboardInner() {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold">{r.brand_name || "Untitled"}</h3>
+                    <h3 className="font-semibold">{r.brand_name || t("dash.untitled")}</h3>
                     <p className="text-xs text-zinc-500">
                       {r.created_at ? new Date(r.created_at).toLocaleDateString() : ""}
                     </p>
@@ -135,7 +137,7 @@ function DashboardInner() {
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 pt-24 text-zinc-500">Loading...</div>}>
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 pt-24 text-zinc-500">…</div>}>
       <DashboardInner />
     </Suspense>
   );

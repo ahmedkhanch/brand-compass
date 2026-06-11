@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/clerk-shim";
+import { useI18n } from "@/lib/i18n";
 import Navbar from "@/components/Navbar";
 import { createCheckout } from "@/lib/api";
 
@@ -10,30 +11,31 @@ const TIERS = [
     name: "Boussole",
     price: "$99",
     priceId: "boussole",
-    reports: "25/month",
-    features: ["Brand Positioning", "SWOT Analysis", "Competitive Landscape", "SEO Score", "GEO Score", "Recommendations"],
+    reports: 25,
+    featureKeys: ["feat.positioning.t", "feat.swot.t", "feat.competitive.t", "feat.seoScore", "feat.geoScore", "feat.reco"],
     highlighted: false,
   },
   {
     name: "Radar",
     price: "$199",
     priceId: "radar",
-    reports: "100/month",
-    features: ["Everything in Boussole", "Meta Ads Analysis", "Report History", "Export to PDF", "Priority Support"],
+    reports: 100,
+    featureKeys: ["feat.everythingBoussole", "feat.metaAds", "feat.history", "feat.pdf", "feat.prioritySupport"],
     highlighted: true,
   },
   {
     name: "Stratège",
     price: "$499",
     priceId: "stratege",
-    reports: "500/month",
-    features: ["Everything in Radar", "Competitive Alerts", "API Access", "White-Label Reports", "Dedicated Analyst"],
+    reports: 500,
+    featureKeys: ["feat.everythingRadar", "feat.alerts", "feat.api", "feat.whiteLabel", "feat.analyst"],
     highlighted: false,
   },
 ];
 
 export default function PricingPage() {
   const { getToken, isSignedIn } = useAuth();
+  const { t } = useI18n();
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleUpgrade = async (tier: string) => {
@@ -45,7 +47,7 @@ export default function PricingPage() {
         window.location.href = res.data.checkout_url;
       }
     } catch (err: any) {
-      alert("Checkout error: " + err.message);
+      alert(t("price.checkoutErr") + err.message);
     } finally {
       setLoading(null);
     }
@@ -56,8 +58,8 @@ export default function PricingPage() {
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 pt-12 pb-16">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold mb-2">Simple Pricing</h1>
-          <p className="text-zinc-400">Choose the plan that fits your brand intelligence needs</p>
+          <h1 className="text-3xl font-bold mb-2">{t("price.title")}</h1>
+          <p className="text-zinc-400">{t("price.subtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -71,19 +73,19 @@ export default function PricingPage() {
               }`}
             >
               {tier.highlighted && (
-                <div className="text-xs text-emerald-400 font-semibold mb-2">Most Popular</div>
+                <div className="text-xs text-emerald-400 font-semibold mb-2">{t("price.popular")}</div>
               )}
               <h3 className="text-xl font-bold">{tier.name}</h3>
               <div className="mt-2 mb-4">
                 <span className="text-3xl font-bold">{tier.price}</span>
-                <span className="text-zinc-500">/month</span>
+                <span className="text-zinc-500">{t("price.perMonth")}</span>
               </div>
-              <p className="text-sm text-zinc-400 mb-4">{tier.reports}</p>
+              <p className="text-sm text-zinc-400 mb-4">{t("price.reports", { n: tier.reports })}</p>
               <ul className="space-y-2 mb-6 flex-1">
-                {tier.features.map((f) => (
-                  <li key={f} className="text-sm flex items-center gap-2">
+                {tier.featureKeys.map((fk) => (
+                  <li key={fk} className="text-sm flex items-center gap-2">
                     <span className="text-emerald-400">✓</span>
-                    <span className="text-zinc-300">{f}</span>
+                    <span className="text-zinc-300">{t(fk)}</span>
                   </li>
                 ))}
               </ul>
@@ -96,7 +98,7 @@ export default function PricingPage() {
                     : "border border-zinc-600 hover:border-zinc-400 text-zinc-200"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {loading === tier.priceId ? "Redirecting..." : isSignedIn ? "Upgrade" : "Sign In to Upgrade"}
+                {loading === tier.priceId ? t("price.redirecting") : isSignedIn ? t("price.upgrade") : t("price.signinUpgrade")}
               </button>
             </div>
           ))}

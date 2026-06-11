@@ -1,5 +1,8 @@
 "use client";
+import { useI18n } from "@/lib/i18n";
+
 export default function StatusBadge({ status }: { status: string }) {
+  const { t } = useI18n();
   const colors: Record<string, string> = {
     queued: "bg-zinc-700 text-zinc-300",
     running: "bg-blue-900/50 text-blue-300 border border-blue-700",
@@ -10,7 +13,7 @@ export default function StatusBadge({ status }: { status: string }) {
     <span
       className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[status] || colors.queued}`}
     >
-      {status}
+      {t(`status.${status}`)}
     </span>
   );
 }

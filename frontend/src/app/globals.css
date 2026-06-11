@@ -5,3 +5,23 @@ body {
   background: #09090b;
   color: #fafafa;
 }
+
+/* ── Report page motion primitives (light, parallax report view) ── */
+@keyframes bc-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-22px); }
+}
+@keyframes bc-float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-34px) translateX(10px); }
+}
+@keyframes bc-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.bc-float { animation: bc-float 7s ease-in-out infinite; }
+.bc-float-slow { animation: bc-float-slow 11s ease-in-out infinite; }
+.bc-spin-slow { animation: bc-spin-slow 120s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .bc-float, .bc-float-slow, .bc-spin-slow { animation: none; }
+}

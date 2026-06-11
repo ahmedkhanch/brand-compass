@@ -41,3 +41,7 @@ docker-compose.override.yml
 _demo_screens/
 backend/data/
 .ora-studio.env
+
+# E2E test output (screenshots + ad-hoc playwright symlink)
+tests/e2e/artifacts/
+tests/e2e/node_modules

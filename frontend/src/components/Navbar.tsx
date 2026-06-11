@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@/lib/clerk-shim";
+import { LangToggle, useI18n } from "@/lib/i18n";
 
 export default function Navbar() {
   const { isSignedIn } = useAuth();
+  const { t } = useI18n();
 
   return (
     <nav className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
@@ -20,26 +22,28 @@ export default function Navbar() {
                 href="/dashboard"
                 className="text-sm text-zinc-400 hover:text-white transition"
               >
-                Dashboard
+                {t("nav.dashboard")}
               </Link>
               <Link
                 href="/pricing"
                 className="text-sm text-zinc-400 hover:text-white transition"
               >
-                Pricing
+                {t("nav.pricing")}
               </Link>
+              <LangToggle />
               <UserButton />
             </>
           ) : (
             <>
+              <LangToggle />
               <SignInButton mode="modal">
                 <button className="text-sm text-zinc-400 hover:text-white transition">
-                  Sign In
+                  {t("nav.signin")}
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
                 <button className="text-sm bg-emerald-500 hover:bg-emerald-400 text-black font-medium px-3 py-1.5 rounded-lg transition">
-                  Get Started
+                  {t("nav.getstarted")}
                 </button>
               </SignUpButton>
             </>

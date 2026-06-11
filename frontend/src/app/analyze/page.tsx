@@ -124,7 +124,7 @@ export default function AnalyzePage() {
               disabled={submitting}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
               placeholder="Nike"
             />
           </div>
@@ -135,7 +135,7 @@ export default function AnalyzePage() {
               disabled={submitting}
               value={form.website_url}
               onChange={(e) => setForm({ ...form, website_url: e.target.value })}
-              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
               placeholder="https://www.nike.com"
             />
           </div>
@@ -146,7 +146,7 @@ export default function AnalyzePage() {
               disabled={submitting}
               value={form.industry}
               onChange={(e) => setForm({ ...form, industry: e.target.value })}
-              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
               placeholder="sportswear"
             />
           </div>
@@ -157,7 +157,7 @@ export default function AnalyzePage() {
               disabled={submitting}
               value={form.competitor}
               onChange={(e) => setForm({ ...form, competitor: e.target.value })}
-              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
               placeholder="adidas"
             />
           </div>

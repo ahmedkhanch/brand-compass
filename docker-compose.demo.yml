@@ -1,6 +1,10 @@
-# Brand Compass — DEMO stack (no API keys, brand-seeded mocks).
-# Backend runs the real FastAPI pipeline with DEMO_MODE=1; frontend runs Next dev
-# with the Clerk shim and same-origin /api + /sse proxy to the backend.
+# Brand Compass — hybrid demo/real stack.
+# Without any keys (DEMO_MODE=true) the full pipeline runs with brand-seeded mocks.
+# Add real API keys to .env and set DEMO_MODE=false: each provider auto-switches
+# independently — Firecrawl becomes real as soon as FIRECRAWL_API_KEY is present,
+# DeepSeek as soon as DEEPSEEK_API_KEY is present, etc. Providers without keys keep
+# serving mock data (graceful degradation, never crash).
+#
 # Frontend is published on host port 4300 (the port the create-ora-studio-project
 # skill assigned to brandcompass-develop.oratelecom.net via Caddy).
 
@@ -11,10 +15,21 @@ services:
     working_dir: /app
     volumes:
       - ./backend:/app
+    env_file:
+      - .env
     environment:
-      - DEMO_MODE=true
+      - DEMO_MODE=${DEMO_MODE:-true}
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=sqlite+aiosqlite:///./data/brand_compass.db
+      # API keys — when set on the host, docker-compose passes them through.
+      # Unset vars are omitted by docker-compose (container sees empty/unset).
+      - FIRECRAWL_API_KEY
+      - DEEPSEEK_API_KEY
+      - SERPAPI_KEY
+      - ANTHROPIC_API_KEY
+      - OPENAI_API_KEY
+      - PERPLEXITY_API_KEY
+      - APIFY_TOKEN
     command: >
       bash -lc "pip install -q fastapi 'uvicorn[standard]' sqlalchemy aiosqlite
       pydantic-settings pyyaml jinja2 requests python-dotenv openai anthropic pyjwt stripe

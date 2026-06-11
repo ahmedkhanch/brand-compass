@@ -12,6 +12,7 @@ Formula:
 """
 
 import os
+from app.config import settings
 from ..providers.deepseek import DeepSeekProvider, DeepSeekError
 
 # ── Probe templates (shared across all engines) ──────────
@@ -61,23 +62,31 @@ def _normalize_text(text: str) -> str:
 
 
 def _try_get_provider(provider_name: str) -> object | None:
-    """Try to initialize a provider. Returns None if key is unavailable."""
-    from ..providers.mock import demo_enabled, MockLLM
+    """Try to initialize a provider whose key is present. Returns None if unavailable."""
+    from ..providers.mock import demo_enabled, provider_ready, MockLLM
     if demo_enabled():
         # Each AI engine is a brand-seeded mock so all 3 GEO engines "respond".
         return MockLLM(engine=provider_name)
     try:
         if provider_name == "claude":
+            if not provider_ready("ANTHROPIC_API_KEY"):
+                return None
             from ..providers.claude import ClaudeProvider
-            return ClaudeProvider()
+            return ClaudeProvider(api_key=settings.ANTHROPIC_API_KEY)
         elif provider_name == "perplexity":
+            if not provider_ready("PERPLEXITY_API_KEY"):
+                return None
             from ..providers.perplexity import PerplexityProvider
-            return PerplexityProvider()
+            return PerplexityProvider(api_key=settings.PERPLEXITY_API_KEY)
         elif provider_name == "openai":
+            if not provider_ready("OPENAI_API_KEY"):
+                return None
             from ..providers.openai import OpenAIProvider
-            return OpenAIProvider()
+            return OpenAIProvider(api_key=settings.OPENAI_API_KEY)
         elif provider_name == "deepseek":
-            return DeepSeekProvider()
+            if not provider_ready("DEEPSEEK_API_KEY"):
+                return None
+            return DeepSeekProvider(api_key=settings.DEEPSEEK_API_KEY)
     except Exception:
         return None
     return None
@@ -229,12 +238,10 @@ def score_geo(brand_name: str, website_url: str = "", industry: str = "",
             engine_results.append(eng_result)
 
     if not engine_results:
-        return {
-            "score": 0,
-            "label": "Error",
-            "breakdown": {"visibility": 0, "sentiment": 0, "consistency": 0},
-            "details": {"error": "No AI engine available", "engines": []},
-        }
+        # No real provider has a key — use brand-seeded mocks for all 3 engines
+        from ..providers.mock import MockLLM
+        for eng_name in engine_order:
+            engine_results.append(_probe_engine(eng_name, MockLLM(engine=eng_name), brand_name, industry))
 
     # ── Compute scores ───────────────────────────────────
     num_engines = len([e for e in engine_results if e.get("available")])

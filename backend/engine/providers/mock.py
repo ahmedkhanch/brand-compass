@@ -1,11 +1,16 @@
 """
 Demo / mock providers — brand-seeded, deterministic stand-ins for every paid API.
 
-When DEMO_MODE is on (no API keys required), the call sites in the scorers and
-orchestrator construct these instead of the real providers. The REAL scoring math,
-report assembly, SSE progress and cost tracking still run end-to-end — only the
-outbound HTTP calls (Firecrawl / SerpAPI / DeepSeek / Claude / OpenAI / Perplexity /
-Apify) are replaced by realistic, brand-tailored fixtures.
+When DEMO_MODE is on OR a specific API key is missing, the call sites in the
+scorers and orchestrator construct these instead of the real providers. Each
+provider auto-switches independently: add FIRECRAWL_API_KEY → Firecrawl becomes
+real; add DEEPSEEK_API_KEY → DeepSeek becomes real; etc. Providers without keys
+keep serving mock data (graceful degradation — never crash).
+
+The REAL scoring math, report assembly, SSE progress and cost tracking still run
+end-to-end — only the outbound HTTP calls (Firecrawl / SerpAPI / DeepSeek /
+Claude / OpenAI / Perplexity / Apify) are replaced by realistic, brand-tailored
+fixtures when a key is missing.
 
 Everything is seeded from the brand name so the same brand always yields the same
 report (good for a live demo), while different brands look genuinely different.
@@ -26,8 +31,24 @@ from app.config import settings
 
 
 def demo_enabled() -> bool:
-    """True when the app should serve mocked data instead of calling paid APIs."""
+    """Master override: when True, every provider stays mocked regardless of keys."""
     return bool(getattr(settings, "DEMO_MODE", False))
+
+
+def provider_ready(key_name: str) -> bool:
+    """True when demo is OFF AND the named API key is present (non-empty, non-placeholder).
+
+    Use this at every gate point so each paid provider switches independently:
+        if provider_ready("FIRECRAWL_API_KEY"):  real;  else:  mock.
+    """
+    if demo_enabled():
+        return False
+    key = getattr(settings, key_name, None)
+    if not key:
+        return False
+    if isinstance(key, str) and key.endswith("..."):
+        return False  # placeholder like "sk-..." — not a real key
+    return True
 
 
 def _seed(*parts: str) -> random.Random:

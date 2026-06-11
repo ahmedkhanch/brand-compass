@@ -16,31 +16,42 @@ _BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 if str(_BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(_BACKEND_DIR))
 
-from ..providers.deepseek import DeepSeekProvider, DeepSeekError
+from app.config import settings
 
 
 def _get_llm(deepseek_key: str = None):
-    """Get the best available LLM provider. Tries Claude → OpenAI → DeepSeek."""
-    from ..providers.mock import demo_enabled, MockLLM
+    """Get the best available LLM provider whose key is set. Tries Claude → OpenAI → DeepSeek.
+    Falls back to MockLLM when no provider key is available (graceful degradation)."""
+    from ..providers.mock import demo_enabled, provider_ready, MockLLM
     if demo_enabled():
         return MockLLM(engine="claude")
+
     # Try Claude first (best quality)
-    try:
-        from ..providers.claude import ClaudeProvider, ClaudeError
-        return ClaudeProvider()
-    except Exception:
-        pass
+    if provider_ready("ANTHROPIC_API_KEY"):
+        try:
+            from ..providers.claude import ClaudeProvider
+            return ClaudeProvider(api_key=settings.ANTHROPIC_API_KEY)
+        except Exception:
+            pass
 
     # Try OpenAI second
-    try:
-        from ..providers.openai import OpenAIProvider, OpenAIError
-        return OpenAIProvider()
-    except Exception:
-        pass
+    if provider_ready("OPENAI_API_KEY"):
+        try:
+            from ..providers.openai import OpenAIProvider
+            return OpenAIProvider(api_key=settings.OPENAI_API_KEY)
+        except Exception:
+            pass
 
-    # Fall back to DeepSeek
-    from ..providers.deepseek import DeepSeekProvider
-    return DeepSeekProvider(api_key=deepseek_key)
+    # Try DeepSeek third
+    if provider_ready("DEEPSEEK_API_KEY"):
+        try:
+            from ..providers.deepseek import DeepSeekProvider
+            return DeepSeekProvider(api_key=settings.DEEPSEEK_API_KEY)
+        except Exception:
+            pass
+
+    # No keys → mock (graceful degradation)
+    return MockLLM(engine="claude")
 
 
 def _load_prompt(name: str, variables: dict) -> dict:

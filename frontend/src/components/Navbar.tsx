@@ -30,6 +30,12 @@ export default function Navbar() {
               >
                 {t("nav.pricing")}
               </Link>
+              <Link
+                href="/wip"
+                className="text-sm text-slate-600 hover:text-indigo-600 transition"
+              >
+                {t("nav.wip")}
+              </Link>
               <LangToggle />
               <UserButton />
             </>

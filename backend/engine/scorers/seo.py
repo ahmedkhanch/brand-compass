@@ -275,9 +275,14 @@ def score_seo(brand_name: str, website_url: str, industry: str = "",
             "details": {...}
         }
     """
-    serpapi = SerpAPIProvider(api_key=serpapi_key)
-    firecrawl = FirecrawlProvider(api_key=firecrawl_key)
     brand_domain = _extract_domain(website_url)
+    from .. providers.mock import demo_enabled, MockSerp, MockFirecrawl
+    if demo_enabled():
+        serpapi = MockSerp(brand_name=brand_name, brand_domain=brand_domain)
+        firecrawl = MockFirecrawl(brand_name=brand_name, industry=industry)
+    else:
+        serpapi = SerpAPIProvider(api_key=serpapi_key)
+        firecrawl = FirecrawlProvider(api_key=firecrawl_key)
 
     # ── 1. Brand SERP Ownership (0–35) ──────────────────
     brand_serp = serpapi.search(brand_name, num=10)

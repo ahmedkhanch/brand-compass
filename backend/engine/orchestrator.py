@@ -95,7 +95,11 @@ def run_full_diagnostic(
     website_text = ""
     t0 = time.monotonic()
     try:
-        firecrawl = FirecrawlProvider(api_key=firecrawl_key)
+        from .providers.mock import demo_enabled, MockFirecrawl
+        if demo_enabled():
+            firecrawl = MockFirecrawl(brand_name=brand_name, industry=industry)
+        else:
+            firecrawl = FirecrawlProvider(api_key=firecrawl_key)
         markdown, metadata = firecrawl.extract_text(website_url)
         website_text = markdown
         report["website_content"] = {
@@ -210,8 +214,12 @@ def run_full_diagnostic(
     # ── 5b. Meta Ads (Apify) — Radar+ tier feature ─────────
     report["meta_ads"] = None
     try:
-        from .providers.apify import ApifyProvider, ApifyError
-        apify = ApifyProvider(api_key=os.getenv("APIFY_TOKEN"))
+        from .providers.mock import demo_enabled, MockApify
+        if demo_enabled():
+            apify = MockApify(brand_name=brand_name)
+        else:
+            from .providers.apify import ApifyProvider, ApifyError
+            apify = ApifyProvider(api_key=os.getenv("APIFY_TOKEN"))
         t0 = time.monotonic()
         ads = apify.search_meta_ads(brand_name, max_results=20)
         report["meta_ads"] = {

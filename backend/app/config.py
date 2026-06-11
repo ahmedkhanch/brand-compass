@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 
+    # ── Demo mode ──
+    # When true, every paid provider (Firecrawl/SerpAPI/DeepSeek/Claude/OpenAI/
+    # Perplexity/Apify) is replaced by brand-seeded mock fixtures so the full
+    # pipeline runs with no API keys. See engine/providers/mock.py.
+    DEMO_MODE: bool = False
+
     # ── Database ──
     # SQLite for local dev, PostgreSQL (asyncpg) for production.
     # Set DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/brandcompass for prod.

@@ -1,0 +1,54 @@
+# Brand Compass — DEMO stack (no API keys, brand-seeded mocks).
+# Backend runs the real FastAPI pipeline with DEMO_MODE=1; frontend runs Next dev
+# with the Clerk shim and same-origin /api + /sse proxy to the backend.
+# Frontend is published on host port 4300 (the port the create-ora-studio-project
+# skill assigned to brandcompass-develop.oratelecom.net via Caddy).
+
+services:
+  backend:
+    image: python:3.11-slim
+    container_name: brandcompass-dev-api
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEMO_MODE=true
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=sqlite+aiosqlite:///./data/brand_compass.db
+    command: >
+      bash -lc "pip install -q fastapi 'uvicorn[standard]' sqlalchemy aiosqlite
+      pydantic-settings pyyaml jinja2 requests python-dotenv openai anthropic pyjwt stripe
+      && mkdir -p /app/data
+      && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    expose:
+      - "8000"
+    ports:
+      - "127.0.0.1:4399:8000"   # local debug only, not routed by Caddy
+    restart: unless-stopped
+    networks:
+      - bcnet
+
+  frontend:
+    image: node:22-alpine
+    container_name: brandcompass-dev-web
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NEXT_PUBLIC_DEMO_MODE=1
+      - NEXT_PUBLIC_API_URL=/api/v1
+      - NEXT_PUBLIC_SSE_URL=/sse
+      - BACKEND_ORIGIN=http://backend:8000
+      - NEXT_TELEMETRY_DISABLED=1
+    command: sh -lc "npm install --legacy-peer-deps && npm run dev -- -p 3000 -H 0.0.0.0"
+    ports:
+      - "4300:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - bcnet
+
+networks:
+  bcnet:
+    name: brandcompass_dev_net

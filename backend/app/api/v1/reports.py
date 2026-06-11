@@ -173,7 +173,8 @@ async def get_meta_ads(
     # Scrape Meta Ads from Apify
     try:
         from engine.providers.apify import ApifyProvider, ApifyError
-        apify = ApifyProvider()
+        from engine.providers.mock import demo_enabled, MockApify
+        apify = MockApify(brand_name=brand_name) if demo_enabled() else ApifyProvider()
         ads = apify.search_meta_ads(brand_name, max_results=20)
 
         summary = {
@@ -225,18 +226,22 @@ async def stream_report_progress(
     async def event_stream():
         last_status = None
         for _ in range(180):  # max 180 iterations × 1s = 3 minutes
-            # Expire all cached objects so SELECT reads fresh data from DB
+            # Expire cached objects so SELECT re-reads from the DB.
             db.expire_all()
             result = await db.execute(
                 select(Report).where(Report.id == report_id)
             )
             report = result.scalar_one_or_none()
+            current_status = report.status.value if report else None
+            # End this read transaction so the next poll starts a fresh snapshot
+            # (SQLite holds a repeatable-read snapshot until the txn closes) and
+            # so the writer pipeline is never blocked by a long-lived reader.
+            await db.rollback()
 
             if not report:
                 yield f"data: {json.dumps({'status': 'error', 'message': 'Report not found'})}\n\n"
                 return
 
-            current_status = report.status.value
             if current_status != last_status:
                 yield f"data: {json.dumps({'status': current_status, 'report_id': report_id})}\n\n"
                 last_status = current_status

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/lib/clerk-shim";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { getSubscription, getCredits, createPortal } from "@/lib/api";

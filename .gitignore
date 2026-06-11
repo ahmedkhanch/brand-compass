@@ -37,3 +37,7 @@ docker-compose.override.yml
 # Temp
 *.log
 *.tmp
+
+_demo_screens/
+backend/data/
+.ora-studio.env

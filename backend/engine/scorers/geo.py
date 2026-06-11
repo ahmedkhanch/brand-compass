@@ -62,6 +62,10 @@ def _normalize_text(text: str) -> str:
 
 def _try_get_provider(provider_name: str) -> object | None:
     """Try to initialize a provider. Returns None if key is unavailable."""
+    from ..providers.mock import demo_enabled, MockLLM
+    if demo_enabled():
+        # Each AI engine is a brand-seeded mock so all 3 GEO engines "respond".
+        return MockLLM(engine=provider_name)
     try:
         if provider_name == "claude":
             from ..providers.claude import ClaudeProvider

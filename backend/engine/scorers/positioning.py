@@ -21,6 +21,9 @@ from ..providers.deepseek import DeepSeekProvider, DeepSeekError
 
 def _get_llm(deepseek_key: str = None):
     """Get the best available LLM provider. Tries Claude → OpenAI → DeepSeek."""
+    from ..providers.mock import demo_enabled, MockLLM
+    if demo_enabled():
+        return MockLLM(engine="claude")
     # Try Claude first (best quality)
     try:
         from ..providers.claude import ClaudeProvider, ClaudeError

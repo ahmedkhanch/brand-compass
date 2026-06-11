@@ -274,24 +274,36 @@ export default function ReportPage() {
   const [metaAds, setMetaAds] = useState<any>(null);
   const [tier, setTier] = useState<string>("boussole");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isSignedIn) return;
+    let cancelled = false;
     const load = async () => {
-      const token = await getToken();
-      const [res, subRes] = await Promise.all([
-        getReport(id, token),
-        getSubscription(token).catch(() => ({ data: { tier: "boussole" } })),
-      ]);
-      setReport(res.data);
-      setTier(subRes?.data?.tier || "boussole");
-      setLoading(false);
-      if (subRes?.data?.tier !== "boussole") {
-        getMetaAds(id, token).then((mr) => setMetaAds(mr?.data || null)).catch(() => {});
+      try {
+        const token = await getToken();
+        const [res, subRes] = await Promise.all([
+          getReport(id, token),
+          getSubscription(token).catch(() => ({ data: { tier: "boussole" } })),
+        ]);
+        if (cancelled) return;
+        if (!res?.data) throw new Error("Report data empty");
+        setReport(res.data);
+        setTier(subRes?.data?.tier || "boussole");
+        setError(null);
+        if (subRes?.data?.tier !== "boussole") {
+          getMetaAds(id, token).then((mr) => setMetaAds(mr?.data || null)).catch(() => {});
+        }
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "Failed to load report");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
     load();
-  }, [id, isSignedIn, getToken]);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isSignedIn]);
 
   if (loading) {
     return (
@@ -304,11 +316,14 @@ export default function ReportPage() {
       </>
     );
   }
-  if (!report) {
+  if (error || !report) {
     return (
       <>
         <ParallaxBackdrop />
-        <div className="min-h-screen flex items-center justify-center text-rose-500">{t("r.notFound")}</div>
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-slate-700">
+          <p className="text-rose-500 font-semibold">{error || t("r.notFound")}</p>
+          <a href="/dashboard" className="text-sm text-indigo-600 hover:underline">{t("r.back")}</a>
+        </div>
       </>
     );
   }

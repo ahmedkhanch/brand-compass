@@ -328,6 +328,9 @@ export default function ReportPage() {
   }
 
   const p = report.payload || {};
+  // Meta Ads already ship inside the report payload (Apify run). Prefer that so the
+  // section renders even when the tier-gated /meta-ads endpoint returns 402.
+  const metaAdsData = metaAds?.meta_ads ?? p.meta_ads ?? null;
   const scores = report.scores;
   const brand = (p.brand || "Brand") as string;
   const brandTitle = brand.charAt(0).toUpperCase() + brand.slice(1);
@@ -619,10 +622,10 @@ export default function ReportPage() {
                 </Link>
                 <p className="text-xs text-slate-500 mt-2">{t("meta.upgradePrice")}</p>
               </div>
-            ) : metaAds?.meta_ads && typeof metaAds.meta_ads === "object" ? (
+            ) : metaAdsData && typeof metaAdsData === "object" ? (
               <div className="space-y-3">
-                <p className="text-sm text-slate-500">{t("meta.adsFound", { n: metaAds.meta_ads.total_ads_found, brand: metaAds.meta_ads.brand_name })}</p>
-                {metaAds.meta_ads.ads?.map((ad: any, i: number) => (
+                <p className="text-sm text-slate-500">{t("meta.adsFound", { n: metaAdsData.total_ads_found, brand: metaAdsData.brand_name })}</p>
+                {metaAdsData.ads?.map((ad: any, i: number) => (
                   <div key={i} className="rounded-xl border border-slate-200 bg-white/70 p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-semibold text-sm text-slate-800">{ad.page_name || "—"}</span>
@@ -632,8 +635,10 @@ export default function ReportPage() {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : report.status !== "complete" ? (
               <p className="text-slate-400 text-sm">{t("meta.loading")}</p>
+            ) : (
+              <p className="text-slate-400 text-sm">{t("meta.none")}</p>
             )}
           </Card>
         </Reveal>

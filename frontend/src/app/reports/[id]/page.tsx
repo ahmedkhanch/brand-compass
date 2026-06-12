@@ -622,18 +622,14 @@ export default function ReportPage() {
                 </Link>
                 <p className="text-xs text-slate-500 mt-2">{t("meta.upgradePrice")}</p>
               </div>
-            ) : metaAdsData && typeof metaAdsData === "object" ? (
-              <div className="space-y-3">
+            ) : metaAdsData && Array.isArray(metaAdsData.ads) && metaAdsData.ads.length > 0 ? (
+              <div className="space-y-4">
                 <p className="text-sm text-slate-500">{t("meta.adsFound", { n: metaAdsData.total_ads_found, brand: metaAdsData.brand_name })}</p>
-                {metaAdsData.ads?.map((ad: any, i: number) => (
-                  <div key={i} className="rounded-xl border border-slate-200 bg-white/70 p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-sm text-slate-800">{ad.page_name || "—"}</span>
-                      <span className="text-xs text-slate-400">{ad.media_type || "N/A"}</span>
-                    </div>
-                    <p className="text-sm text-slate-600 line-clamp-3">{ad.ad_text || ad.ad_creative_text || ad.body || "—"}</p>
-                  </div>
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {metaAdsData.ads.map((ad: AdItem, i: number) => (
+                    <MetaAdCard key={i} ad={ad} t={t} />
+                  ))}
+                </div>
               </div>
             ) : report.status !== "complete" ? (
               <p className="text-slate-400 text-sm">{t("meta.loading")}</p>
@@ -652,6 +648,62 @@ export default function ReportPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+interface AdItem {
+  page_name?: string;
+  media_type?: string;
+  ad_text?: string;
+  image_url?: string | null;
+  snapshot_url?: string | null;
+  cta_text?: string | null;
+  start_date?: string | null;
+  is_active?: boolean;
+}
+
+// One Meta ad: visual + copy. Clickable → the real Facebook Ad Library snapshot.
+function MetaAdCard({ ad, t }: { ad: AdItem; t: (k: string) => string }) {
+  const inner = (
+    <>
+      {ad.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={ad.image_url}
+          alt={ad.page_name || "ad"}
+          loading="lazy"
+          className="w-full h-40 object-cover bg-slate-100"
+        />
+      ) : (
+        <div className="w-full h-40 grid place-items-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 text-xs">
+          {ad.media_type || "ad"}
+        </div>
+      )}
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2 gap-2">
+          <span className="font-semibold text-sm text-slate-800 truncate">{ad.page_name || "—"}</span>
+          <span className="text-[10px] uppercase tracking-wide text-slate-400 shrink-0">{ad.media_type || "N/A"}</span>
+        </div>
+        <p className="text-sm text-slate-600 line-clamp-3">{ad.ad_text || "—"}</p>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          {ad.cta_text ? (
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">{ad.cta_text}</span>
+          ) : <span />}
+          {ad.snapshot_url && (
+            <span className="text-[11px] font-medium text-indigo-600 inline-flex items-center gap-1">
+              {t("meta.viewAd")}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </span>
+          )}
+        </div>
+      </div>
+    </>
+  );
+  const cls = "block overflow-hidden rounded-xl border border-slate-200 bg-white/70 transition hover:shadow-md hover:-translate-y-0.5";
+  return ad.snapshot_url ? (
+    <a href={ad.snapshot_url} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
+  ) : (
+    <div className={cls}>{inner}</div>
   );
 }
 

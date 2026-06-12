@@ -215,21 +215,26 @@ def run_full_diagnostic(
     # ── 5b. Meta Ads (Apify) — Radar+ tier feature ─────────
     report["meta_ads"] = None
     try:
-        from .providers.mock import provider_ready, MockApify
-        if provider_ready("APIFY_TOKEN"):
+        from .providers.mock import provider_ready
+        is_real_apify = provider_ready("APIFY_TOKEN")
+        if is_real_apify:
+            # Only the real Meta Ads Library produces ads. Without the key we
+            # return an empty list — never fabricate ads (a brand that doesn't
+            # advertise must show zero, not invented creatives).
             from .providers.apify import ApifyProvider, ApifyError
             apify = ApifyProvider(api_key=settings.APIFY_TOKEN)
+            t0 = time.monotonic()
+            ads = apify.search_meta_ads(brand_name, max_results=20)
+            _record_cost(costs, "apify", duration_ms=round((time.monotonic() - t0) * 1000))
         else:
-            apify = MockApify(brand_name=brand_name)
-        t0 = time.monotonic()
-        ads = apify.search_meta_ads(brand_name, max_results=20)
+            ads = []
         report["meta_ads"] = {
             "total_ads_found": len(ads),
             "brand_name": brand_name,
             "ads": ads[:10],
+            "source": "apify" if is_real_apify else "mock",
             "fetched_at": datetime.now(timezone.utc).isoformat(),
         }
-        _record_cost(costs, "apify", duration_ms=round((time.monotonic() - t0) * 1000))
     except Exception:
         pass  # Meta Ads is optional — don't block the report if it fails
 

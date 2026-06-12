@@ -170,17 +170,22 @@ async def get_meta_ads(
             meta={"tier": "radar"},
         )
 
-    # Scrape Meta Ads from Apify
+    # Scrape Meta Ads from Apify — only the real key yields ads. Without it we
+    # return an empty list, never fabricated creatives.
     try:
         from engine.providers.apify import ApifyProvider, ApifyError
-        from engine.providers.mock import demo_enabled, MockApify
-        apify = MockApify(brand_name=brand_name) if demo_enabled() else ApifyProvider()
-        ads = apify.search_meta_ads(brand_name, max_results=20)
+        from engine.providers.mock import provider_ready
+        is_real_apify = provider_ready("APIFY_TOKEN")
+        if is_real_apify:
+            ads = ApifyProvider().search_meta_ads(brand_name, max_results=20)
+        else:
+            ads = []
 
         summary = {
             "total_ads_found": len(ads),
             "brand_name": brand_name,
             "ads": ads[:10],  # top 10 ads
+            "source": "apify" if is_real_apify else "mock",
             "fetched_at": datetime.now(timezone.utc).isoformat(),
         }
 

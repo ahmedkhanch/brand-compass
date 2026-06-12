@@ -15,6 +15,26 @@ class ApifyError(Exception):
     pass
 
 
+def _normalize_ad(raw: dict) -> dict:
+    """Map a raw Meta Ads Library item to the shape the report UI consumes.
+
+    Keeps only what the Meta Ads section renders: brand, format, copy, a
+    visual, and the Ad Library snapshot URL (clickable to the real ad).
+    """
+    images = raw.get("images") or []
+    image_url = images[0] if images else (raw.get("page_profile_pic") or None)
+    return {
+        "page_name": raw.get("page_name") or "",
+        "media_type": raw.get("media_type") or "",
+        "ad_text": raw.get("ad_text") or raw.get("title") or "",
+        "image_url": image_url,
+        "snapshot_url": raw.get("ad_snapshot_url") or None,
+        "cta_text": raw.get("cta_text") or None,
+        "start_date": raw.get("start_date") or None,
+        "is_active": raw.get("is_active"),
+    }
+
+
 class ApifyProvider:
     """Wraps Apify Meta Ads scraper for competitive ad data."""
 
@@ -96,7 +116,7 @@ class ApifyProvider:
 
         data = ds_resp.json()
         if isinstance(data, list):
-            return data
+            return [_normalize_ad(a) for a in data if isinstance(a, dict)]
         return []
 
     def check_health(self) -> dict:

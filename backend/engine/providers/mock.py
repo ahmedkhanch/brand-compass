@@ -370,38 +370,3 @@ class MockLLM:
 
     def check_health(self):
         return {"ok": True, "response": "OK"}
-
-
-class MockApify:
-    """Returns Meta Ads Library-shaped fixtures for the Radar+ Meta Ads section."""
-
-    def __init__(self, brand_name: str = "", api_key: str = None):
-        self.brand = brand_name or "Brand"
-
-    def search_meta_ads(self, brand_name: str = "", country: str = "US",
-                        max_results: int = 50) -> list:
-        brand = brand_name or self.brand
-        rng = _seed(brand, "ads")
-        media = ["image", "video", "carousel"]
-        ctas = [["Shop Now"], ["Learn More"], ["Sign Up"], ["Shop Now", "Learn More"]]
-        copy = [
-            f"New season just dropped at {brand}. Free shipping this week only.",
-            f"Why thousands choose {brand} — quality you can feel. Discover the collection.",
-            f"Limited edition {brand} essentials. Selling fast — don't miss out.",
-            f"{brand}: designed for everyday. Try it risk-free for 30 days.",
-            f"Join the {brand} community. Members save 15% on every order.",
-        ]
-        n = rng.randint(6, 14)
-        ads = []
-        for i in range(min(n, max_results)):
-            ads.append({
-                "page_name": brand,
-                "media_type": rng.choice(media),
-                "ad_text": rng.choice(copy),
-                "body": rng.choice(copy),
-                "detected_ctas": rng.choice(ctas),
-            })
-        return ads
-
-    def check_health(self):
-        return {"ok": True, "username": "demo"}

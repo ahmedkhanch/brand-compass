@@ -213,6 +213,7 @@ const MESSAGES: Record<string, Entry> = {
   "meta.adsFound": { fr: "{n} publicités actives trouvées pour {brand}", en: "{n} active ads found for {brand}" },
   "meta.loading": { fr: "Chargement des données Meta Ads…", en: "Loading Meta Ads data..." },
   "meta.none": { fr: "Aucune publicité Meta active trouvée pour cette marque.", en: "No active Meta ads found for this brand." },
+  "meta.viewAd": { fr: "Voir la pub", en: "View ad" },
 };
 
 interface I18nValue {

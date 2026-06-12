@@ -44,8 +44,8 @@ async def get_subscription(
         )
     else:
         return SuccessResponse(
-            data={"tier": "boussole", "tier_label": "Boussole", "status": "active"},
-            meta={"tier": "boussole"},
+            data={"tier": "radar", "tier_label": "Radar", "status": "active"},
+            meta={"tier": "radar"},
         )
 
 

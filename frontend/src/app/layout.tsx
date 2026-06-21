@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/lib/clerk-shim";
 import { I18nProvider } from "@/lib/i18n";
+import WeatherMarquee from "@/components/WeatherMarquee";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function RootLayout({
     <AuthProvider>
       <html lang="fr">
         <body className="min-h-screen bg-transparent text-slate-900 antialiased">
+          <WeatherMarquee />
           <I18nProvider>{children}</I18nProvider>
         </body>
       </html>

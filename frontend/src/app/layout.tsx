@@ -17,6 +17,9 @@ export default function RootLayout({
     <AuthProvider>
       <html lang="fr">
         <body className="min-h-screen bg-transparent text-slate-900 antialiased">
+          <div role="alert" className="w-full bg-yellow-400 text-slate-900 text-center text-sm font-medium py-2 px-4">
+            warning tout va bien
+          </div>
           <I18nProvider>{children}</I18nProvider>
         </body>
       </html>

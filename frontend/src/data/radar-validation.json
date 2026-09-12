@@ -1,0 +1,48 @@
+{
+  "date": "12 septembre 2026",
+  "scope": "Livraison du suivi RadarOS V2 : page /wip, matrice des besoins et board Forgejo. Ces validations ne certifient pas les capacités produit V2.",
+  "checks": [
+    {
+      "id": "WIP-01",
+      "title": "Couverture intégrale et liens",
+      "procedure": "Vérifier les 30 sections, les critères d’acceptation, les références de code et les tickets du board.",
+      "status": "passed",
+      "evidence": "Matrice contrôlée : 30 sections uniques, 35 tickets distincts et références de fichiers présentes au commit audité."
+    },
+    {
+      "id": "WIP-02",
+      "title": "Recherche, filtres et détails",
+      "procedure": "Filtrer P0, rechercher Shopify, combiner les filtres, tester le résultat vide, réinitialiser et ouvrir les preuves.",
+      "status": "passed",
+      "evidence": "Parcours Brave/Playwright local puis en ligne réussi : filtre P0 (5 besoins), recherche Shopify, combinaison vide, remise à zéro, tout déplier/replier et activation au clavier."
+    },
+    {
+      "id": "WIP-03",
+      "title": "Export du listing",
+      "procedure": "Télécharger le Markdown et vérifier les 30 identifiants, les critères et les liens vers les tickets.",
+      "status": "passed",
+      "evidence": "Markdown téléchargé et contrôlé : 30 besoins, 5 fondations, 35 liens de tickets, relecture et arbitrages."
+    },
+    {
+      "id": "WIP-04",
+      "title": "Affichage desktop et mobile",
+      "procedure": "Vérifier la navigation, les cartes et les détails à 1440 px et à 390 px, sans débordement horizontal.",
+      "status": "passed",
+      "evidence": "Captures desktop 1440 px et mobile 390 px examinées ; aucun débordement horizontal ni erreur JavaScript. Parcours répété avec succès sur le domaine déployé."
+    },
+    {
+      "id": "WIP-05",
+      "title": "Accès à la page déployée et au board",
+      "procedure": "Vérifier le refus sans accès et l’ouverture avec les identifiants fournis ; ouvrir un ticket et contrôler les colonnes.",
+      "status": "passed",
+      "evidence": "Site en ligne : HTTP 401 sans identifiants et 200 avec accès. Connexion navigateur Forgejo réussie : 35 cartes, 10 P0 dans Prêt, 25 dans À cadrer ; contenu des tickets contrôlé."
+    },
+    {
+      "id": "WIP-06",
+      "title": "Compilation et qualité du changement",
+      "procedure": "Compiler Next.js et vérifier les fichiers touchés : typage, lint, absence de secret et de SQL, responsabilités séparées.",
+      "status": "passed",
+      "evidence": "Build Next.js 16.2.7 et TypeScript réussis ; ESLint ciblé réussi. Convention middleware historique dépréciée signalée par Next, sans échec du build."
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+> **Reprise RadarOS V2 — 12 septembre 2026 :** consulter [l’audit et le déploiement](docs/radaros-audit.md), [la page de suivi](https://brandcompass-develop.oratelecom.net/wip) et [le board](https://git.oratelecom.net/ora/brandcompass-roadmap/projects/1). Le document ci-dessous décrit Brand Compass historique ; il ne mesure pas la conformité au nouveau brief.
+
 # Brand Compass — Final Architecture
 
 > **Version:** 3.1 — Final MVP (devis-aligned)

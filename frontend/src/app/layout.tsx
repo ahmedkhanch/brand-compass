@@ -17,8 +17,8 @@ export default function RootLayout({
     <AuthProvider>
       <html lang="fr">
         <body className="min-h-screen bg-transparent text-slate-900 antialiased">
-          <div role="alert" className="w-full bg-yellow-400 text-slate-900 text-center text-sm font-medium py-2 px-4">
-            warning tout va bien
+          <div role="status" className="w-full bg-slate-100 text-slate-600 text-center text-xs py-2 px-4">
+            Développement · <a href="/wip" className="underline">Suivi du projet RadarOS</a>
           </div>
           <I18nProvider>{children}</I18nProvider>
         </body>

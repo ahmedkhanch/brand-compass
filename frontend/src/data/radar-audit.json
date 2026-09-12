@@ -1,0 +1,874 @@
+{
+  "date": "12 septembre 2026",
+  "baseline": "324c554",
+  "repository": "https://github.com/ahmedkhanch/brand-compass",
+  "branch": "develop",
+  "brief": "Brief RadarOS.docx — RadarOS V2, 30 sections",
+  "items": [
+    {
+      "id": "R01",
+      "section": 1,
+      "title": "Une requête, une marque, une fiche",
+      "status": "partial",
+      "priority": "P0",
+      "existing": "Création Brand + Report, tâche asynchrone et page de rapport individuelle.",
+      "missing": [
+        "Le produit reste un diagnostic marketing généraliste.",
+        "Construire une fiche de faits observables et conserver chaque analyse comme un instantané."
+      ],
+      "acceptance": [
+        "Une soumission valide produit une seule fiche persistée.",
+        "Aucune affirmation factuelle sans observation ou état « non disponible »."
+      ],
+      "evidence": [
+        "backend/app/api/v1/brands.py",
+        "backend/engine/orchestrator.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/6",
+      "issueNumber": 6,
+      "forgejoId": 218
+    },
+    {
+      "id": "R02",
+      "section": 2,
+      "title": "Frontière RadarOS / MarketOS",
+      "status": "missing",
+      "priority": "P1",
+      "existing": "Une analyse concurrentielle existe dans le diagnostic historique.",
+      "missing": [
+        "Définir Radar ponctuel/public et Market continu/interne.",
+        "Isoler les futures données Shopify, Klaviyo puis GA4 du rapport public."
+      ],
+      "acceptance": [
+        "Les données privées ne sont jamais présentées comme connues pour un concurrent.",
+        "Les contrats et droits des deux produits sont distincts."
+      ],
+      "evidence": [
+        "backend/engine/orchestrator.py",
+        "backend/app/models/subscription.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/7",
+      "issueNumber": 7,
+      "forgejoId": 219
+    },
+    {
+      "id": "R03",
+      "section": 3,
+      "title": "Offres, crédits et back-office",
+      "status": "partial",
+      "priority": "P0",
+      "existing": "Crédit débité avant génération ; relecture du rapport sans débit. Stripe et abonnements présents dans le code.",
+      "missing": [
+        "Remplacer 99/199/499 € et 25/100/500 crédits par Radar 10 à 29 €, Radar 20 à 49 €.",
+        "Afficher en permanence utilisé / total et progression.",
+        "Back-office pour prix, crédits, durée, règles.",
+        "Sécuriser débit concurrent, idempotence, renouvellement de période et traitement des échecs."
+      ],
+      "acceptance": [
+        "Deux requêtes concurrentes ne dépensent pas le même dernier crédit.",
+        "Relecture gratuite ; nouvelle analyse = un débit unique.",
+        "Renouvellement mensuel et règle de remboursement explicitement testés.",
+        "Les offres affichées correspondent à la configuration et au paiement."
+      ],
+      "evidence": [
+        "backend/app/config.py",
+        "backend/app/core/credit_guard.py",
+        "frontend/src/app/pricing/page.tsx",
+        "backend/app/services/stripe.py"
+      ],
+      "dependencies": "Décision sur consommation à la soumission / au succès ; migrations des offres historiques",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/8",
+      "issueNumber": 8,
+      "forgejoId": 220
+    },
+    {
+      "id": "R04",
+      "section": 4,
+      "title": "Écran nouvelle analyse",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Formulaire nom, URL, secteur, concurrent.",
+      "missing": [
+        "Champ unique nom ou URL avec résolution de marque.",
+        "Choix « ma marque » / « autre marque », persisté.",
+        "Même collecte quel que soit le rapport à la marque."
+      ],
+      "acceptance": [
+        "Un domaine sans protocole est accepté et normalisé.",
+        "Changer la relation ne change que l’interprétation, jamais les faits."
+      ],
+      "evidence": [
+        "frontend/src/app/analyze/page.tsx",
+        "backend/app/schemas/brand.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/9",
+      "issueNumber": 9,
+      "forgejoId": 221
+    },
+    {
+      "id": "R05",
+      "section": 5,
+      "title": "Chargement fidèle au travail réel",
+      "status": "partial",
+      "priority": "P0",
+      "existing": "États queued/running/complete/failed, SSE backend, polling frontend.",
+      "missing": [
+        "Les étapes visuelles sont minutées artificiellement.",
+        "Émettre les étapes réelles site, offre, produits, social, contenus, Ads, SEO, GEO, stratégies et score.",
+        "Reprise après rechargement, erreurs partielles et timeout explicites."
+      ],
+      "acceptance": [
+        "Une coche n’apparaît qu’après un événement réel terminé.",
+        "Source indisponible affichée sans fausse réussite.",
+        "Rechargement retrouve le même job sans nouveau crédit."
+      ],
+      "evidence": [
+        "frontend/src/app/analyze/page.tsx",
+        "backend/app/api/v1/reports.py",
+        "backend/app/api/v1/brands.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/10",
+      "issueNumber": 10,
+      "forgejoId": 222
+    },
+    {
+      "id": "R06",
+      "section": 6,
+      "title": "Identité et URL de la fiche",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Route /reports/[id], marque, URL, date et éléments de positionnement.",
+      "missing": [
+        "URL /radar/marque-id ou alias stable.",
+        "Logo, description courte, secteur, catégorie, modèle économique, pays/marchés.",
+        "Mention données publiques et périmètre de collecte."
+      ],
+      "acceptance": [
+        "Tous les champs ont une provenance ou « non déterminé ».",
+        "Une ancienne fiche reste accessible après une nouvelle analyse."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx",
+        "backend/app/models/report.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/11",
+      "issueNumber": 11,
+      "forgejoId": 223
+    },
+    {
+      "id": "R07",
+      "section": 7,
+      "title": "Radar Score et sept sous-scores",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "SEO, GEO et moyenne des deux comme score global.",
+      "missing": [
+        "Offre, Site & conversion, Social, Ads, Branding manquants.",
+        "Méthode versionnée, poids, interprétation et couverture.",
+        "Évolution depuis la précédente analyse comparable."
+      ],
+      "acceptance": [
+        "Les sept dimensions ont une formule documentée.",
+        "Une dimension non observée est indisponible, jamais zéro inventé.",
+        "Delta uniquement entre observations et versions comparables."
+      ],
+      "evidence": [
+        "backend/engine/orchestrator.py",
+        "backend/engine/scorers/seo.py",
+        "backend/engine/scorers/geo.py"
+      ],
+      "dependencies": "R26 preuves ; collecteurs R10–R14 ; arbitrage pondération et couverture minimale",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/12",
+      "issueNumber": 12,
+      "forgejoId": 224
+    },
+    {
+      "id": "R08",
+      "section": 8,
+      "title": "Synthèse en 30 secondes",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Executive summary SWOT et texte de positionnement générés.",
+      "missing": [
+        "Synthèse prioritaire, très courte, de faits récents.",
+        "Justification d’une accélération uniquement par données historiques."
+      ],
+      "acceptance": [
+        "La synthèse renvoie aux observations ; aucun mouvement temporel sans deux relevés.",
+        "Elle reste compréhensible en moins de 30 secondes."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx",
+        "backend/engine/scorers/positioning.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/13",
+      "issueNumber": 13,
+      "forgejoId": 225
+    },
+    {
+      "id": "R09",
+      "section": 9,
+      "title": "Stratégies marketing détectées",
+      "status": "missing",
+      "priority": "P1",
+      "existing": "Positionnement et SWOT génériques réutilisables comme présentation.",
+      "missing": [
+        "Détecter bundles, promotions, produit héros, lancement, acquisition, rétention visible, fidélité, parrainage.",
+        "Influence, UGC, ambassadeurs, affiliation, éducation, communauté, social proof.",
+        "Éditions limitées, drops, cadeaux, abonnement, cross-sell et upsell.",
+        "Intensité et décompte reliés aux observations."
+      ],
+      "acceptance": [
+        "Chaque stratégie affichée a au moins une preuve datée, un niveau de confiance et une règle identifiable.",
+        "Une stratégie absente de la collecte n’est pas déclarée inexistante."
+      ],
+      "evidence": [
+        "backend/engine/scorers/positioning.py",
+        "backend/engine/orchestrator.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/14",
+      "issueNumber": 14,
+      "forgejoId": 226
+    },
+    {
+      "id": "R10",
+      "section": 10,
+      "title": "Produits et offres Radar",
+      "status": "missing",
+      "priority": "P1",
+      "existing": "Scraping textuel du site ; aucune collection produit normalisée trouvée.",
+      "missing": [
+        "Produits : nom, image, prix/devise et URL.",
+        "Produit héros justifié par homepage, Ads, contenus et best-seller affiché.",
+        "Accélération mesurée sur 30 jours.",
+        "Bundles : composition, prix normal/bundle, économie.",
+        "Première commande, livraison, promotion, cadeau, abonnement."
+      ],
+      "acceptance": [
+        "Les montants et économies sont traçables et cohérents.",
+        "Best-seller affiché n’est jamais assimilé à un classement réel des ventes.",
+        "Sans historique, aucune hausse en pourcentage."
+      ],
+      "evidence": [
+        "backend/engine/providers/firecrawl.py",
+        "backend/engine/orchestrator.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/15",
+      "issueNumber": 15,
+      "forgejoId": 227
+    },
+    {
+      "id": "R11",
+      "section": 11,
+      "title": "Ads Radar",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Apify Meta Ads : texte, format, image, lien snapshot, CTA, début, statut actif.",
+      "missing": [
+        "Angles, hooks, produits, landing pages, UGC/statique/vidéo/témoignage/démonstration/before-after.",
+        "Ancienneté, variantes et Signal Radar justifié.",
+        "Périmètre pays/période, dédoublonnage, pagination et identité annonceur.",
+        "Distinguer zéro résultat de collecte indisponible ; limite actuelle 20 résultats / 10 affichés."
+      ],
+      "acceptance": [
+        "Aucun ROAS, CPA, conversion ou CA concurrent inventé.",
+        "Compte annoncé limité au périmètre réellement collecté.",
+        "Signal de présence publicitaire sans prétention de performance.",
+        "Cas succès immédiat Apify testé : poll_resp peut être non défini dans le code actuel."
+      ],
+      "evidence": [
+        "backend/engine/providers/apify.py",
+        "backend/engine/orchestrator.py",
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/16",
+      "issueNumber": 16,
+      "forgejoId": 228
+    },
+    {
+      "id": "R12",
+      "section": 12,
+      "title": "Social Radar",
+      "status": "missing",
+      "priority": "P1",
+      "existing": "Champ social_accounts dans la marque ; pas de pipeline Social Radar identifié.",
+      "missing": [
+        "Instagram, TikTok, Facebook, YouTube, Pinterest et LinkedIn pertinent.",
+        "Abonnés, fréquence, engagement observable, formats, angles, sujets et évolution.",
+        "Top 3 : miniature, titre/hook, plateforme, vues/likes/commentaires, date, format.",
+        "Explication du classement et comparaison des patterns."
+      ],
+      "acceptance": [
+        "Couverture et période visibles par plateforme ; indisponibilité explicite.",
+        "Top 3 et ratios calculés sur un échantillon vérifiable, jamais complétés par invention."
+      ],
+      "evidence": [
+        "backend/app/schemas/brand.py",
+        "backend/app/models/brand.py",
+        "backend/engine/orchestrator.py"
+      ],
+      "dependencies": "Arbitrer sources, droits d’accès, coûts et plateformes MVP ; R26",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/17",
+      "issueNumber": 17,
+      "forgejoId": 229
+    },
+    {
+      "id": "R13",
+      "section": 13,
+      "title": "Site et conversion",
+      "status": "missing",
+      "priority": "P1",
+      "existing": "Firecrawl extrait du texte ; SEO et positionnement exploitent une partie du site.",
+      "missing": [
+        "Proposition de valeur, homepage, navigation/mobile, fiches, CTA et avis.",
+        "Preuves sociales, best-sellers, bundles, cross-sell/upsell, réassurance.",
+        "Livraison, retours, FAQ, popup, capture email/téléphone, fidélité.",
+        "Score site, 3 réussites, 3 améliorations justifiées."
+      ],
+      "acceptance": [
+        "Chaque constat référence une page ou capture datée.",
+        "Un audit mobile repose sur une observation mobile.",
+        "Les trois points ne sont pas forcés si les preuves sont insuffisantes."
+      ],
+      "evidence": [
+        "backend/engine/providers/firecrawl.py",
+        "backend/engine/scorers/seo.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/18",
+      "issueNumber": 18,
+      "forgejoId": 230
+    },
+    {
+      "id": "R14",
+      "section": 14,
+      "title": "SEO et GEO distincts",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Scorers séparés : Google/SerpAPI et sondes de moteurs IA.",
+      "missing": [
+        "SEO : enrichir pages, structure, contenus evergreen, autorité ; trafic/backlinks uniquement si disponibles.",
+        "GEO : FAQ, données structurées, clarté sémantique, contenus explicatifs, citations mesurables.",
+        "Corriger les sondes suggestives qui nomment déjà la marque ; tracer moteurs, requêtes, dates et réponses."
+      ],
+      "acceptance": [
+        "SEO et GEO ont des preuves et limites séparées.",
+        "Une réponse LLM à une question qui contient la marque n’est pas une mesure de citation spontanée.",
+        "Aucune estimation de trafic non sourcée."
+      ],
+      "evidence": [
+        "backend/engine/scorers/seo.py",
+        "backend/engine/scorers/geo.py"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/19",
+      "issueNumber": 19,
+      "forgejoId": 231
+    },
+    {
+      "id": "R15",
+      "section": 15,
+      "title": "Trois forces et trois faiblesses",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Quadrants SWOT affichés.",
+      "missing": [
+        "Transformer les listes en constat + preuve/donnée + interprétation.",
+        "Sélectionner trois forces et trois faiblesses justifiées."
+      ],
+      "acceptance": [
+        "Chaque élément ouvre sa preuve ; manque de données signalé au lieu de remplir arbitrairement."
+      ],
+      "evidence": [
+        "backend/engine/scorers/positioning.py",
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "Socle de fiabilité et modèle de preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/20",
+      "issueNumber": 20,
+      "forgejoId": 232
+    },
+    {
+      "id": "R16",
+      "section": 16,
+      "title": "Trois actions ou enseignements",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Recommandations générées et affichées.",
+      "missing": [
+        "Ma marque : améliorer, tester, surveiller.",
+        "Autre marque : à étudier, à retenir, à surveiller.",
+        "Sélection de trois actions liées aux seuls faits observés."
+      ],
+      "acceptance": [
+        "La relation marque persistée commande automatiquement le wording.",
+        "Chaque action possède une preuve et n’extrapole pas les performances internes."
+      ],
+      "evidence": [
+        "backend/engine/scorers/positioning.py",
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "R4 relation marque ; R26 preuves",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/21",
+      "issueNumber": 21,
+      "forgejoId": 233
+    },
+    {
+      "id": "R17",
+      "section": 17,
+      "title": "Teasing MarketOS : produit",
+      "status": "missing",
+      "priority": "P2",
+      "existing": "Bloc premium générique existant.",
+      "missing": [
+        "Insight catégorie/produit suivi du bénéfice de connecter Shopify.",
+        "Potentiel de ventes verrouillé et CTA contextuel."
+      ],
+      "acceptance": [
+        "Aucun potentiel chiffré affiché comme calculé avant connexion.",
+        "CTA conserve le contexte de l’insight."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "R24 LockedInsight ; R10 données produits",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/22",
+      "issueNumber": 22,
+      "forgejoId": 234
+    },
+    {
+      "id": "R18",
+      "section": 18,
+      "title": "Teasing MarketOS : bundles",
+      "status": "missing",
+      "priority": "P2",
+      "existing": "Aucun rapprochement réel panier/produits.",
+      "missing": [
+        "Prévisualisation composition, prix et potentiel d’un bundle.",
+        "Explication des achats associés via Shopify.",
+        "Décompte multimarque seulement si ces marques ont été observées."
+      ],
+      "acceptance": [
+        "« 4 marques utilisent des bundles » nécessite quatre fiches couvertes.",
+        "Les valeurs verrouillées restent des emplacements, pas des calculs fictifs."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "R24 ; R10 ; arbitrage des observations multimarques disponibles",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/23",
+      "issueNumber": 23,
+      "forgejoId": 235
+    },
+    {
+      "id": "R19",
+      "section": 19,
+      "title": "Teasing MarketOS : CRM",
+      "status": "missing",
+      "priority": "P2",
+      "existing": "Pas de connecteur Klaviyo identifié.",
+      "missing": [
+        "Bénéfices campagnes, flows, emails/SMS et automatisations.",
+        "Preview CA email et meilleur flow sans fabrication de résultat."
+      ],
+      "acceptance": [
+        "« 3 opportunités détectées » n’est jamais présenté comme réel sans données CRM.",
+        "CTA explique la connexion nécessaire."
+      ],
+      "evidence": [
+        "backend/app/services",
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "R24 ; connecteurs MarketOS dans un lot distinct",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/24",
+      "issueNumber": 24,
+      "forgejoId": 236
+    },
+    {
+      "id": "R20",
+      "section": 20,
+      "title": "Teasing MarketOS : best-sellers",
+      "status": "missing",
+      "priority": "P2",
+      "existing": "Pas de données de commandes internes.",
+      "missing": [
+        "Véritable best-seller, croissance et baisse à débloquer via Shopify.",
+        "Comparaison des commandes aux tendances externes."
+      ],
+      "acceptance": [
+        "Le best-seller public affiché et le best-seller réel issu des ventes sont clairement distingués."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "R24 ; R10",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/25",
+      "issueNumber": 25,
+      "forgejoId": 237
+    },
+    {
+      "id": "R21",
+      "section": 21,
+      "title": "Teasing MarketOS : concurrence continue",
+      "status": "missing",
+      "priority": "P2",
+      "existing": "Comparatif textuel ponctuel disponible.",
+      "missing": [
+        "Comparaison continue prix, offres, produits, contenus, croissance, opportunités.",
+        "Configuration ma marque et concurrents suivis."
+      ],
+      "acceptance": [
+        "Aucun suivi permanent promis comme actif sans planification et historique.",
+        "Le clic explique ce qui sera connecté et comparé."
+      ],
+      "evidence": [
+        "backend/engine/orchestrator.py",
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "R2 frontière produits ; R24",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/26",
+      "issueNumber": 26,
+      "forgejoId": 238
+    },
+    {
+      "id": "R22",
+      "section": 22,
+      "title": "Upsell contextualisé",
+      "status": "missing",
+      "priority": "P2",
+      "existing": "Upsell par niveau d’abonnement historique.",
+      "missing": [
+        "Relier insight observé, question propre à la marque et opportunité MarketOS.",
+        "CTA « Voir l’opportunité » vers le paywall en conservant le contexte."
+      ],
+      "acceptance": [
+        "Aucun message générique de montée en gamme à la place du bénéfice précis.",
+        "Événement CTA vérifiable et contexte transmis."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "R24",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/27",
+      "issueNumber": 27,
+      "forgejoId": 239
+    },
+    {
+      "id": "R23",
+      "section": 23,
+      "title": "Promesse et offre MarketOS",
+      "status": "missing",
+      "priority": "P2",
+      "existing": "Plans historiques Boussole/Radar/Stratège.",
+      "missing": [
+        "MarketOS 99 €/mois, RadarOS inclus.",
+        "Présenter Shopify, Klaviyo puis autres sources progressives.",
+        "Promesse ventes, produits, offres, site, CRM, social, concurrents, tendances → 3 priorités."
+      ],
+      "acceptance": [
+        "Le paywall distingue disponible et à venir.",
+        "Prix et droits Radar inclus correspondent au back-office.",
+        "Nombre de crédits Radar inclus dans MarketOS arbitré, non fixé par le brief."
+      ],
+      "evidence": [
+        "frontend/src/app/pricing/page.tsx",
+        "backend/app/config.py"
+      ],
+      "dependencies": "Arbitrage crédits Radar inclus ; R3 ; R24",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/28",
+      "issueNumber": 28,
+      "forgejoId": 240
+    },
+    {
+      "id": "R24",
+      "section": 24,
+      "title": "Composant LockedInsight réutilisable",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Composant PremiumLock local au rapport, lié aux offres historiques.",
+      "missing": [
+        "Extraire titre, aperçu, valeur masquée, brique requise, bénéfice, CTA, prix.",
+        "Supporter Radar→Market→Ads→Creative→Finance/Growth.",
+        "Contrôler les droits côté serveur pour les données réellement protégées."
+      ],
+      "acceptance": [
+        "Une primitive sert tous les teasings.",
+        "Aucune donnée protégée n’est envoyée puis seulement floutée dans le navigateur.",
+        "Navigation clavier et libellé accessible testés."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx",
+        "backend/app/core/subscription_guard.py"
+      ],
+      "dependencies": "R2 produits et droits ; R3 offres",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/29",
+      "issueNumber": 29,
+      "forgejoId": 241
+    },
+    {
+      "id": "R25",
+      "section": 25,
+      "title": "Historique et favoris",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Dashboard liste et ouvre les rapports ; suppression disponible côté API.",
+      "missing": [
+        "Menu latéral Mes analyses.",
+        "Recherche, filtres, favoris et suppression dans l’interface.",
+        "Regroupement ma marque / concurrents / autres."
+      ],
+      "acceptance": [
+        "Un favori reste après rechargement ; recherche/filtre/suppression respectent le propriétaire.",
+        "Ouvrir une fiche ne consomme rien.",
+        "Toutes les pages de l’historique sont accessibles."
+      ],
+      "evidence": [
+        "frontend/src/app/dashboard/page.tsx",
+        "backend/app/api/v1/reports.py"
+      ],
+      "dependencies": "R4 relation marque ; migration versionnée favoris",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/30",
+      "issueNumber": 30,
+      "forgejoId": 242
+    },
+    {
+      "id": "R26",
+      "section": 26,
+      "title": "Preuves et confiance par insight",
+      "status": "missing",
+      "priority": "P0",
+      "existing": "Payload JSON et quelques sources globales SEO/Ads.",
+      "missing": [
+        "Schéma observation/insight : donnée, catégorie, marque, date, période, source, URL, preuve, image, confiance, analyse IA, score.",
+        "Séparer observé, estimé, interprété, simulé et indisponible.",
+        "Provenance de bout en bout, versionnage et conservation des preuves."
+      ],
+      "acceptance": [
+        "Chaque insight se rattache à une observation vérifiable.",
+        "Les simulations sont identifiées et exclues des scores réels.",
+        "Une clé configurée ne suffit pas à déclarer un fournisseur opérationnel."
+      ],
+      "evidence": [
+        "backend/app/models/report.py",
+        "backend/engine/providers/mock.py",
+        "backend/engine/orchestrator.py"
+      ],
+      "dependencies": "Contrats typés ; politique de conservation et droits sur les captures",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/31",
+      "issueNumber": 31,
+      "forgejoId": 243
+    },
+    {
+      "id": "R27",
+      "section": 27,
+      "title": "Pipeline collecte → décision",
+      "status": "partial",
+      "priority": "P0",
+      "existing": "Adapters fournisseurs, orchestration, SEO/GEO séparés et coûts estimés présents.",
+      "missing": [
+        "Normaliser les observations avant détection des produits/offres/stratégies/patterns.",
+        "Scorer puis interpréter puis recommander puis teaser.",
+        "Services/repositories pour les accès DB ; nouvelle migration pour tout schéma.",
+        "Supprimer les valeurs synthétiques silencieuses ; distinguer collecte vide/erreur/partielle.",
+        "Jobs durables, délais, reprise, coûts et doubles lancements maîtrisés."
+      ],
+      "acceptance": [
+        "Un parcours réel traverse chaque contrat avec ses preuves.",
+        "Aucun SQL manuscrit nouveau, aucun accès DB client/runner.",
+        "Toute capacité possède validation /tests et documentation OpenAPI /docs."
+      ],
+      "evidence": [
+        "backend/engine/orchestrator.py",
+        "backend/app/api/v1/brands.py",
+        "backend/app/jobs/report_worker.py",
+        "backend/app/database.py"
+      ],
+      "dependencies": "R26 ; socle sécurité/auth et règles de crédits",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/32",
+      "issueNumber": 32,
+      "forgejoId": 244
+    },
+    {
+      "id": "R28",
+      "section": 28,
+      "title": "Structure commune des insights",
+      "status": "missing",
+      "priority": "P1",
+      "existing": "Sections de rapport autonomes sans contrat commun fait/preuve/action.",
+      "missing": [
+        "Détecté → pourquoi intéressant → à retenir → pour votre marque / MarketOS si pertinent.",
+        "Préserver la distinction fait / interprétation / recommandation."
+      ],
+      "acceptance": [
+        "Les cartes produits, stratégies, Ads et contenus suivent le même contrat.",
+        "Preuve et confiance accessibles depuis chaque carte."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx"
+      ],
+      "dependencies": "R26 ; R24",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/33",
+      "issueNumber": 33,
+      "forgejoId": 245
+    },
+    {
+      "id": "R29",
+      "section": 29,
+      "title": "Design RadarOS",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "Interface claire, cartes et jauges circulaires ; images Ads présentes.",
+      "missing": [
+        "Navigation bleu nuit, violet GrowthOS, espace et hiérarchie fait → insight → action.",
+        "Miniatures produits/contenus, graphiques simples, états vert/orange/rouge.",
+        "Responsive, clavier, contraste et états de données indisponibles."
+      ],
+      "acceptance": [
+        "La fiche privilégie synthèse et 3 actions sans mur de KPI.",
+        "Tests visuels mobile/desktop et parcours clavier.",
+        "Confronter aux maquettes embarquées dans le DOCX avant validation finale."
+      ],
+      "evidence": [
+        "frontend/src/app/reports/[id]/page.tsx",
+        "frontend/src/app/globals.css"
+      ],
+      "dependencies": "R6–R16 et R28 ; validation maquettes",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/34",
+      "issueNumber": 34,
+      "forgejoId": 246
+    },
+    {
+      "id": "R30",
+      "section": 30,
+      "title": "Transition observation → décision",
+      "status": "partial",
+      "priority": "P1",
+      "existing": "L’ancien projet constitue un socle de diagnostic de marque.",
+      "missing": [
+        "Réaligner navigation, vocabulaire, README et onboarding sur RadarOS / MarketOS.",
+        "Montrer explicitement la limite du public et la valeur du rapprochement avec les données internes."
+      ],
+      "acceptance": [
+        "Radar répond « que fait cette marque ? ».",
+        "Market répond « que dois-je faire avec mes données et mon marché ? ».",
+        "Aucun module MarketOS non livré n’est vendu comme opérationnel."
+      ],
+      "evidence": [
+        "README.md",
+        "frontend/src/app/page.tsx",
+        "frontend/src/app/wip/page.tsx"
+      ],
+      "dependencies": "R2 ; R23",
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/35",
+      "issueNumber": 35,
+      "forgejoId": 247
+    }
+  ],
+  "boardUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/projects/1",
+  "review": {
+    "status": "Deux relectures indépendantes reçues — Claude, effort high",
+    "summary": [
+      "Accord : le diagnostic historique est un socle réutilisable, mais les produits/offres, le Social Radar, les stratégies prouvées et les teasings MarketOS demandent de nouveaux modules.",
+      "Accord : prioriser la provenance des observations, les simulations explicites, les crédits et la vraie progression avant de revendiquer une analyse fiable.",
+      "Correction après vérification du code complet : SEO/GEO et le design restent partiels face à V2 ; la synthèse SWOT et PremiumLock constituent des éléments réutilisables. Aucun chapitre n’est déclaré validé de bout en bout.",
+      "Désaccord : les estimations globales de couverture proposées par Claude ne sont pas retenues, faute de méthode pondérée. Le remboursement des crédits est un arbitrage produit, pas une règle explicite du brief.",
+      "Priorité finale : sécurité et données avant les teasings. Les comptes multimarques, tendances historiques et opportunités CRM des exemples exigent des observations réelles ; ils ne doivent pas être simulés.",
+      "Relecture finale : couverture et statuts jugés cohérents. L’ouverture des détails est désormais mémorisée par besoin et les priorités ont des valeurs explicites. Les liens du board et les contrôles d’accès sont vérifiés séparément."
+    ]
+  },
+  "runtime": {
+    "frontend": "Page de suivi remise en ligne dans le cadre de cette livraison ; contrôle HTTP et navigateur consigné dans /tests.",
+    "backend": "API et jobs étaient arrêtés au début de l’audit et restent arrêtés. Leur réactivation nécessite les corrections d’authentification et d’isolation P0 ; aucun nouveau rapport réel n’est validé ici.",
+    "providers": "Firecrawl, DeepSeek, SerpAPI et Apify : clés présentes dans la configuration. Validité, crédit fournisseur et fraîcheur des résultats non vérifiés.",
+    "auth": "Accès de développement protégé par Basic Auth ; ce n’est pas une authentification SaaS par utilisateur."
+  },
+  "risks": [
+    {
+      "id": "F01",
+      "title": "Authentification et isolation des données",
+      "priority": "P0",
+      "detail": "Le backend accepte un utilisateur anonyme et des tokens dev même hors démo ; le proxy historique exclut API/SSE de Basic Auth. Le SSE ne filtre pas Report.user_id. Réactiver l’API exige une protection vérifiée.",
+      "acceptance": [
+        "Sans identité valide : 401 côté API.",
+        "Compte A ne peut lire, supprimer ni suivre un rapport de B.",
+        "Tokens de démo rejetés hors environnement de démo."
+      ],
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/1",
+      "issueNumber": 1,
+      "forgejoId": 213
+    },
+    {
+      "id": "F02",
+      "title": "Intégrité abonnements et données premium",
+      "priority": "P0",
+      "detail": "Le endpoint d’upgrade direct ne vérifie pas le mode démo et peut modifier les droits et recharger les crédits. Le rapport complet contient les données premium : le floutage ne suffit pas à les protéger.",
+      "acceptance": [
+        "Seul un événement de paiement vérifié modifie les droits payants.",
+        "Aucun contenu restreint dans la réponse d’un compte non autorisé."
+      ],
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/2",
+      "issueNumber": 2,
+      "forgejoId": 214
+    },
+    {
+      "id": "F03",
+      "title": "Données honnêtes et scoring reproductible",
+      "priority": "P0",
+      "detail": "Fallbacks mock, scores SEO/GEO et étapes de chargement peuvent donner une impression de collecte réelle. Le score global actuel est la moyenne SEO/GEO.",
+      "acceptance": [
+        "Fixtures identifiées et isolées du mode réel.",
+        "Collecte impossible distincte de zéro résultat.",
+        "Méthode, version et couverture des scores visibles."
+      ],
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/3",
+      "issueNumber": 3,
+      "forgejoId": 215
+    },
+    {
+      "id": "F04",
+      "title": "Conformité du socle de données",
+      "priority": "P0",
+      "detail": "Dette historique : SQL PRAGMA, create_all au démarrage, accès ORM dans les routes et dans le worker, logique de pipeline dupliquée. La présence d’Alembic ne prouve pas une migration de déploiement.",
+      "acceptance": [
+        "Fonctions modifiées conformes API → service/repository → SQLAlchemy.",
+        "Schéma uniquement via opérations Alembic versionnées ; downgrade testé.",
+        "Worker utilise un contrat API autorisé ; orchestration métier partagée."
+      ],
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/4",
+      "issueNumber": 4,
+      "forgejoId": 216
+    },
+    {
+      "id": "F05",
+      "title": "Exploitation et validation réelles",
+      "priority": "P0",
+      "detail": "Services arrêtés au constat initial ; code Clerk/Stripe/Redis/email présent mais activation réelle non démontrée. Pas de page /tests dans le socle initial.",
+      "acceptance": [
+        "Déploiement reproductible et retour arrière documenté.",
+        "/tests réunit les preuves fonctionnelles ; /docs reste le seul catalogue API.",
+        "Parcours réel validé avec coûts et délais observés, puis tests isolation/concurrence/reprise."
+      ],
+      "issueUrl": "https://git.oratelecom.net/ora/brandcompass-roadmap/issues/5",
+      "issueNumber": 5,
+      "forgejoId": 217
+    }
+  ],
+  "decisions": [
+    "Règle de débit : à la soumission ou au succès, et remboursement en cas d’échec partiel/total.",
+    "Quota RadarOS inclus dans MarketOS à 99 € : le brief ne donne pas le nombre.",
+    "Pays, période et plateformes prioritaires ; budget et accès des collecteurs Social/Ads.",
+    "Historique disponible et cadence des instantanés pour les deltas et accélérations.",
+    "Méthode des sept scores, couverture minimale et traitement des dimensions non observées.",
+    "Périmètre MVP RadarOS et calendrier distinct des vrais connecteurs MarketOS.",
+    "Les teasings multimarques et les opportunités CRM ne peuvent annoncer des chiffres sans observations correspondantes."
+  ]
+}

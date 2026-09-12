@@ -1,0 +1,43 @@
+{
+  "cutoffLabel": "12/09/2026 22:17 UTC",
+  "counterCutoff": "2026-09-12T22:16:06.103Z",
+  "phases": [
+    {
+      "id": "coding",
+      "title": "Finalisation, tests et livraison du lot sécurité",
+      "model": "gpt-6-astra",
+      "effort": "medium",
+      "reason": "Identité, isolation et droits traversent l’API, les services et le navigateur.",
+      "estimate": "45–90 min ; 30 000–65 000 tokens (estimation initiale non corrigée après mesure)",
+      "elapsedSeconds": 663.276799,
+      "tokens": 1967374,
+      "cachedInputTokens": 1904000,
+      "costLabel": "Coût facturé indisponible dans la télémétrie Codex. Temps de reprise mesuré, hors travail historique non instrumenté."
+    },
+    {
+      "id": "review-initial",
+      "title": "Revue indépendante",
+      "model": "claude-opus-4-7",
+      "effort": "high",
+      "reason": "Contrôle indépendant des frontières de sécurité et des preuves.",
+      "estimate": "3–10 min ; 20 000–45 000 tokens",
+      "elapsedSeconds": 77.524,
+      "tokens": 91498,
+      "cachedInputTokens": 0,
+      "costLabel": "0.6522 USD équivalent API déclaré par Claude ; ce n’est pas une facture d’abonnement."
+    },
+    {
+      "id": "review-final",
+      "title": "Revue des correctifs",
+      "model": "claude-opus-4-7",
+      "effort": "high",
+      "reason": "Contrôle indépendant des frontières de sécurité et des preuves.",
+      "estimate": "3–10 min ; 20 000–45 000 tokens",
+      "elapsedSeconds": 61.144,
+      "tokens": 83114,
+      "cachedInputTokens": 41246,
+      "costLabel": "0.3507 USD équivalent API déclaré par Claude ; ce n’est pas une facture d’abonnement."
+    }
+  ],
+  "scope": "Photographie de la finalisation F01/F02. Le contexte relu et les appels successifs comptent dans les tokens : les estimations initiales sous-estiment cet effet. Les tokens en cache sont inclus dans le total, sans double comptage. Les travaux Contribute et le cadrage des tickets suivants sont suivis séparément. La consommation historique antérieure à l’instrumentation reste inconnue."
+}

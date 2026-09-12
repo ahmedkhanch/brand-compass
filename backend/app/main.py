@@ -16,22 +16,15 @@ if str(_BACKEND_DIR) not in sys.path:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.database import init_db, close_db
+from app.database import close_db
+from app.core.private_responses import PrivateApiResponses
 from app.api.v1.router import router as v1_router
 from app.api.v1.reports import sse_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup: create tables. Shutdown: close DB connection."""
-    import logging
-    logger = logging.getLogger("brand_compass")
-    logger.info(f".env loaded: DEEPSEEK={'SET' if settings.DEEPSEEK_API_KEY else 'MISSING'}, "
-                f"FIRECRAWL={'SET' if settings.FIRECRAWL_API_KEY else 'MISSING'}, "
-                f"SERPAPI={'SET' if settings.SERPAPI_KEY else 'MISSING'}")
-    logger.info("Creating database tables...")
-    await init_db()
-    logger.info("Startup complete — ready for requests")
+    """The deployment runs Alembic before startup; the API never creates tables."""
     yield
     await close_db()
 
@@ -40,6 +33,7 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     lifespan=lifespan,
+    redoc_url=None,
 )
 
 # ── CORS ──
@@ -50,6 +44,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(PrivateApiResponses)
 
 # ── Routes ──
 app.include_router(v1_router)

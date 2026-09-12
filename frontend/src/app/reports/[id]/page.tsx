@@ -272,7 +272,7 @@ export default function ReportPage() {
   const router = useRouter();
   const [report, setReport] = useState<ReportData | null>(null);
   const [metaAds, setMetaAds] = useState<any>(null);
-  const [tier, setTier] = useState<string>("radar");
+  const [tier, setTier] = useState<string>("boussole");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -284,12 +284,12 @@ export default function ReportPage() {
         const token = await getToken();
         const [res, subRes] = await Promise.all([
           getReport(id, token),
-          getSubscription(token).catch(() => ({ data: { tier: "radar" } })),
+          getSubscription(token).catch(() => ({ data: { tier: "boussole" } })),
         ]);
         if (cancelled) return;
         if (!res?.data) throw new Error("Report data empty");
         setReport(res.data);
-        setTier(subRes?.data?.tier || "radar");
+        setTier(subRes?.data?.tier || "boussole");
         setError(null);
         // Always fetch Meta Ads — Radar unlocked by default for demo
         getMetaAds(id, token).then((mr) => setMetaAds(mr?.data || null)).catch(() => {});

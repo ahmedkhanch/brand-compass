@@ -19,7 +19,7 @@ async function fetchAPI(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API}${path}`, { ...options, headers });
+  const res = await fetch(`${API}${path}`, { ...options, headers, cache: "no-store" });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(err.detail || `API error ${res.status}`);
@@ -79,10 +79,6 @@ export async function getCredits(token?: string | null) {
 // ── Subscription ──
 export async function getSubscription(token?: string | null) {
   return fetchAPI("/subscription", {}, token);
-}
-
-export async function upgradeSubscription(tier: string, token?: string | null) {
-  return fetchAPI(`/subscription/upgrade?tier=${tier}`, { method: "POST" }, token);
 }
 
 export async function createCheckout(

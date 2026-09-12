@@ -19,9 +19,9 @@ class ReportResponse(BaseModel):
     payload: Optional[dict] = None
     scores: Optional[dict] = None
     error_message: Optional[str] = None
-    generated_at: Optional[str] = None
-    created_at: Optional[str] = None
-    expires_at: Optional[str] = None
+    generated_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -31,7 +31,7 @@ class ReportListItem(BaseModel):
     brand_name: Optional[str] = None
     status: str
     scores: Optional[dict] = None
-    created_at: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -41,3 +41,13 @@ class ReportListResponse(BaseModel):
     total: int
     page: int = 1
     page_size: int = 20
+
+
+class DeleteReportResult(BaseModel):
+    deleted: bool
+
+
+class ReportAdsResult(BaseModel):
+    report_id: str
+    meta_ads: Optional[dict] = None
+    availability: Optional[str] = None

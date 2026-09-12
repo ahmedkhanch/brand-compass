@@ -594,7 +594,7 @@
       "title": "Composant LockedInsight réutilisable",
       "status": "partial",
       "priority": "P1",
-      "existing": "Composant PremiumLock local au rapport, lié aux offres historiques.",
+      "existing": "Composant verrou visuel historique local au rapport, lié aux offres historiques.",
       "missing": [
         "Extraire titre, aperçu, valeur masquée, brique requise, bénéfice, CTA, prix.",
         "Supporter Radar→Market→Ads→Creative→Finance/Growth.",
@@ -779,7 +779,7 @@
     "summary": [
       "Accord : le diagnostic historique est un socle réutilisable, mais les produits/offres, le Social Radar, les stratégies prouvées et les teasings MarketOS demandent de nouveaux modules.",
       "Accord : prioriser la provenance des observations, les simulations explicites, les crédits et la vraie progression avant de revendiquer une analyse fiable.",
-      "Correction après vérification du code complet : SEO/GEO et le design restent partiels face à V2 ; la synthèse SWOT et PremiumLock constituent des éléments réutilisables. Aucun chapitre n’est déclaré validé de bout en bout.",
+      "Correction après vérification du code complet : SEO/GEO et le design restent partiels face à V2 ; la synthèse SWOT et verrou visuel historique constituent des éléments réutilisables. Aucun chapitre n’est déclaré validé de bout en bout.",
       "Désaccord : les estimations globales de couverture proposées par Claude ne sont pas retenues, faute de méthode pondérée. Le remboursement des crédits est un arbitrage produit, pas une règle explicite du brief.",
       "Priorité finale : sécurité et données avant les teasings. Les comptes multimarques, tendances historiques et opportunités CRM des exemples exigent des observations réelles ; ils ne doivent pas être simulés.",
       "Relecture finale : couverture et statuts jugés cohérents. L’ouverture des détails est désormais mémorisée par besoin et les priorités ont des valeurs explicites. Les liens du board et les contrôles d’accès sont vérifiés séparément."

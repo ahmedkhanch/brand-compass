@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import security from "@/data/radar-security-validation.json";
 import audit from "@/data/radar-audit.json";
 import AuditShell from "@/components/roadmap/AuditShell";
+import ExecutionSummary from "@/components/roadmap/ExecutionSummary";
 import AuditExplorer from "@/components/roadmap/AuditExplorer";
 import styles from "@/components/roadmap/audit.module.css";
 
@@ -21,6 +23,10 @@ export default function RoadmapPage() {
       {[['30','sections du brief analysées'],[String(partial),'sections avec un socle partiel'],[String(missing),'sections à construire'],['0','section V2 validée de bout en bout']].map(([n,label]) => <div key={label}><strong>{n}</strong><span>{label}</span></div>)}
     </div>
     <p className={styles.note}>L’ancien « 70 % » décrivait les sprints Brand Compass de juin. Il est remplacé par une couverture du brief, sans pourcentage d’avancement artificiel. Les sections n’ont pas toutes la même taille.</p>
+    <section className={styles.section} id="chantier-securite">
+      <p className={styles.eyebrow}>CHANTIER EN COURS · F01 / F02</p><h2>{security.title}</h2>
+      <div className={styles.card}><p>{security.summary}</p><p><strong>{security.checks.filter(x => x.status === "passed").length} familles de contrôles vérifiées en environnement isolé.</strong> Connexion Clerk et cycle Stripe réels encore à valider.</p><a href="/tests#security">Voir les scénarios, les preuves et leurs limites →</a></div>
+    </section>
     <section className={styles.section}>
       <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>CE QUI EST VÉRIFIÉ</p><h2>État de reprise</h2></div><a href={audit.repository} target="_blank" rel="noreferrer">Code sur GitHub ↗</a></div>
       <div className={styles.runtimeGrid}>
@@ -38,6 +44,7 @@ export default function RoadmapPage() {
       </div>
       <div className={styles.risks}>{audit.risks.map(risk => <details className={styles.risk} key={risk.id} id={risk.id}><summary><span className={styles.p0}>{risk.priority}</span><strong>{risk.title}</strong><span>+</span></summary><div><p>{risk.detail}</p><ul>{risk.acceptance.map(x => <li key={x}>{x}</li>)}</ul>{"issueUrl" in risk && <a href={String(risk.issueUrl)} target="_blank" rel="noreferrer">Ticket {risk.id} ↗</a>}</div></details>)}</div>
     </section>
+    <ExecutionSummary />
     <AuditExplorer />
     <section id="relecture" className={styles.section}>
       <p className={styles.eyebrow}>REGARD CROISÉ</p><h2>Analyse Codex & relecture AskClaude high</h2>

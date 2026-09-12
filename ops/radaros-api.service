@@ -1,0 +1,23 @@
+[Unit]
+Description=RadarOS isolated development API
+After=network.target
+
+[Service]
+Type=simple
+User=radaros
+Group=radaros
+WorkingDirectory=/srv/radaros/source/backend
+EnvironmentFile=/srv/radaros/backend.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStartPre=/srv/radaros/venv/bin/python -m alembic upgrade head
+ExecStart=/srv/radaros/venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 14399
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/srv/radaros/state
+
+[Install]
+WantedBy=multi-user.target

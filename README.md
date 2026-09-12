@@ -1,3 +1,5 @@
+> **Lot sécurité F01/F02 :** [identité et droits](docs/security/identity-and-report-access.md) · [exploitation isolée](docs/operations/isolated-development.md) · [preuves fonctionnelles](https://brandcompass-develop.oratelecom.net/tests#security).
+
 > **Reprise RadarOS V2 — 12 septembre 2026 :** consulter [l’audit et le déploiement](docs/radaros-audit.md), [la page de suivi](https://brandcompass-develop.oratelecom.net/wip) et [le board](https://git.oratelecom.net/ora/brandcompass-roadmap/projects/1). Le document ci-dessous décrit Brand Compass historique ; il ne mesure pas la conformité au nouveau brief.
 
 # Brand Compass — Final Architecture

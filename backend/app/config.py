@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     # Perplexity/Apify) is replaced by brand-seeded mock fixtures so the full
     # pipeline runs with no API keys. See engine/providers/mock.py.
     DEMO_MODE: bool = False
+    # Demo identity bypass must be opted into separately from mock providers.
+    ALLOW_DEMO_AUTH: bool = False
 
     # ── Database ──
     # SQLite for local dev, PostgreSQL (asyncpg) for production.
@@ -37,6 +39,8 @@ class Settings(BaseSettings):
     # ── Clerk Auth ──
     CLERK_SECRET_KEY: Optional[str] = None
     CLERK_JWT_ISSUER: Optional[str] = None
+    CLERK_JWT_AUDIENCE: Optional[str] = None
+    CLERK_AUTHORIZED_PARTIES: str = ""
 
     # ── AI Providers ──
     ANTHROPIC_API_KEY: Optional[str] = None

@@ -6,7 +6,8 @@ from sqlalchemy import select
 from app.database import get_db
 from app.core.deps import get_or_create_user
 from app.models import User, Subscription, Credit, TierEnum
-from app.schemas.common import SuccessResponse
+from app.schemas.common import SuccessResponse, ApiResponse
+from app.schemas.identity import IdentityHealthData
 
 router = APIRouter()
 
@@ -59,14 +60,10 @@ async def get_me(
     )
 
 
-@router.get("/health", response_model=SuccessResponse)
+@router.get("/health", response_model=ApiResponse[IdentityHealthData], summary="Read identity configuration status",
+            description="Public readiness information. Demo identities are available only when both explicit demo switches are enabled. No secrets are returned.")
 async def auth_health():
-    """Simple health check for the auth system."""
-    from app.config import settings
-    return SuccessResponse(
-        data={
-            "status": "ok",
-            "mode": "production" if settings.CLERK_SECRET_KEY else "dev",
-            "auth_provider": "Clerk" if settings.CLERK_SECRET_KEY else "dev-user tokens",
-        }
-    )
+    from app.core.identity import demo_auth_enabled, identity_configured
+    mode = "demo" if demo_auth_enabled() else ("clerk" if identity_configured() else "unconfigured")
+    return ApiResponse(data={"status": "ok" if mode != "unconfigured" else "unconfigured",
+                                 "mode": mode, "auth_provider": "Clerk" if mode == "clerk" else mode})

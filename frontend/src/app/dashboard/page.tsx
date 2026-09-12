@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import StatusBadge from "@/components/StatusBadge";
-import { listReports, getCredits, upgradeSubscription } from "@/lib/api";
+import { listReports, getCredits, getSubscription } from "@/lib/api";
 
 interface ReportItem {
   id: string;
@@ -27,18 +27,20 @@ function DashboardInner() {
   const [error, setError] = useState<string | null>(null);
   const [upgradeTier, setUpgradeTier] = useState<string | null>(null);
 
-  // Auto-upgrade on successful Stripe checkout redirect
+  // Confirm persisted rights after checkout; the redirect never grants access.
   useEffect(() => {
     const checkoutSuccess = searchParams.get("checkout");
     const tier = searchParams.get("tier");
     if (checkoutSuccess === "success" && tier && isSignedIn) {
-      const upgrade = async () => {
+      const confirmSubscription = async () => {
         const token = await getToken();
-        await upgradeSubscription(tier, token);
-        setUpgradeTier(tier);
+        const subscription = await getSubscription(token);
+        if (subscription.data?.status === "active" && subscription.data.tier === tier) {
+          setUpgradeTier(subscription.data.tier);
+        }
         window.history.replaceState({}, "", "/dashboard");
       };
-      upgrade();
+      confirmSubscription().catch(() => setUpgradeTier(null));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, isSignedIn]);

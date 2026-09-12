@@ -41,6 +41,8 @@ try {
   await page.getByRole('button', { name: 'Tout replier', exact: true }).click();
   assert.equal(await page.locator('details[id^="R"][open]').count(), 0);
   results.push('Recherche, filtres combinés, état vide, reset, ouverture globale et clavier vérifiés');
+  assert.equal(await page.locator('#execution').count(), 1);
+  assert.ok((await page.locator('#execution').innerText()).includes('gpt-6-astra'));
   const downloadEvent = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exporter le listing' }).click();
   const download = await downloadEvent;
@@ -64,6 +66,9 @@ try {
   await page.goto(origin + '/tests', { waitUntil: 'networkidle' });
   assert.equal(await page.getByRole('heading', { name: 'Page de validation', exact: true }).count(), 1);
   assert.equal(await page.getByRole('heading', { name: 'Suivi RadarOS V2 · /wip', exact: true }).count(), 1);
+  assert.equal(await page.locator('#security').count(), 1);
+  assert.equal(await page.locator('#security article').count(), 6);
+  assert.ok((await page.locator('#security').innerText()).includes('Connexion et paiement réels'));
   assert.equal(errors.length, 0, errors.join('\n'));
   results.push('/tests centralisée présente, aucune erreur JavaScript');
   await fs.writeFile(path.join(output, 'browser-results.json'), JSON.stringify({ origin, results, errors, checkedAt: new Date().toISOString() }, null, 2));

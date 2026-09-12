@@ -1,0 +1,70 @@
+{
+  "id": "security",
+  "tickets": [
+    "F01",
+    "F02"
+  ],
+  "title": "Identité, isolation et droits des rapports",
+  "status": "validated_in_isolation",
+  "environment": "Hetzner 8 Go · base temporaire créée par Alembic",
+  "date": "13 septembre 2026",
+  "summary": "Le socle bloque les identités invalides et les accès entre comptes. Les données Ads sont filtrées selon les droits persistés ; un retour de paiement ne peut plus attribuer un abonnement.",
+  "checks": [
+    {
+      "id": "SEC-01",
+      "title": "Identité vérifiée",
+      "status": "passed",
+      "procedure": "Appeler l’API sans identité, avec un token démo hors démo, avec des JWT signés valides et invalides.",
+      "evidence": "Tests HTTP : RS256, signature, issuer, audience, azp, expiration, champs requis, clé JWKS inconnue et panne fournisseur. Aucun repli anonyme."
+    },
+    {
+      "id": "SEC-02",
+      "title": "Isolation des rapports et du suivi",
+      "status": "passed",
+      "procedure": "Un compte B tente de lire, lister, supprimer et suivre le rapport du compte A. Puis A supprime son rapport pendant le suivi.",
+      "evidence": "Réponses 404 identiques pour les rapports absents ou étrangers ; le flux se termine après suppression. Réponses privées non mises en cache."
+    },
+    {
+      "id": "SEC-03",
+      "title": "Droits payants côté serveur",
+      "status": "passed",
+      "procedure": "Lire le rapport au niveau de base, accorder puis retirer des droits via la fixture de test, tenter l’ancien upgrade direct.",
+      "evidence": "Ads absentes du JSON non autorisé, 402 sur l’accès Ads, upgrade direct 403 et crédits inchangés. Aucun coût interne dans les rapports."
+    },
+    {
+      "id": "SEC-04",
+      "title": "Contrats API et migrations",
+      "status": "passed",
+      "procedure": "Installer le schéma avec Alembic et contrôler le contrat OpenAPI des routes modifiées.",
+      "evidence": "41 tests réussis sur la machine de développement. Swagger /docs accessible ; ReDoc supprimé ; le démarrage ne crée plus les tables."
+    },
+    {
+      "id": "SEC-06",
+      "title": "Service isolé démarré avec protections actives",
+      "status": "passed",
+      "procedure": "Démarrer le service non privilégié sur sa base vierge, puis vérifier la santé, Swagger et les refus d’accès.",
+      "evidence": "Service radaros-api actif sur boucle locale. Sans identité et avec token démo : 401. Clerk annoncé non configuré ; aucune route de fixture dans le service."
+    },
+    {
+      "id": "SEC-05",
+      "title": "Connexion et paiement réels",
+      "status": "pending",
+      "procedure": "Valider Clerk configuré et le cycle Stripe signé, y compris rejeu, renouvellement et annulation.",
+      "evidence": "Non validé par ces fixtures. F02/R03 restent ouverts pour le cycle de facturation ; aucune transaction Stripe réelle effectuée."
+    }
+  ],
+  "review": {
+    "model": "Claude Opus 4.7",
+    "effort": "high",
+    "elapsedSeconds": 77.524,
+    "tokens": 91498,
+    "apiEquivalentUsd": 0.65223625,
+    "status": "Deux relectures effectuées ; correctifs contrôlés, avis final ACCEPT."
+  },
+  "limitations": [
+    "Signatures RSA réelles testées ; téléchargement JWKS simulé.",
+    "La création concurrente d’une identité est vérifiée sur SQLite ; PostgreSQL reste à valider.",
+    "Les quotas SSE et les confirmations Stripe différées restent suivis dans F05 et R03.",
+    "Suite backend complète : 45 réussites, un échec Ads de démo également reproduit sur le code de départ (F03)."
+  ]
+}

@@ -17,21 +17,48 @@ def _run_diagnostic(brand_input: dict[str, str]) -> dict:
     )
 
 
-async def run(brand_input: dict[str, str], user_id: str, report_id: str) -> None:
-    """Run a diagnostic and persist only the matching owner's state transitions."""
+SAFE_FAILURE_MESSAGE = "Analysis execution failed"
+
+
+async def _mark_failed(report_id: str, user_id: str) -> None:
+    """Persist a safe terminal state without exposing engine errors."""
     async with async_session_factory() as db:
-        if not await report_runs.mark_running(db, report_id, user_id):
-            return
+        try:
+            await report_runs.fail(db, report_id, user_id, SAFE_FAILURE_MESSAGE)
+            await db.commit()
+        except Exception:
+            await db.rollback()
+
+
+async def execute(brand_input: dict[str, str], user_id: str, report_id: str) -> str:
+    """Claim, execute, and persist an internally authorized report run."""
+    async with async_session_factory() as db:
+        if not await report_runs.claim_queued(db, report_id, user_id):
+            return "not_claimed"
         await db.commit()
 
     try:
         diagnostic = await asyncio.to_thread(_run_diagnostic, brand_input)
-    except Exception as exc:
-        async with async_session_factory() as db:
-            await report_runs.fail(db, report_id, user_id, str(exc))
-            await db.commit()
-        return
+    except Exception:
+        await _mark_failed(report_id, user_id)
+        return "failed"
 
+    completion_failed = False
     async with async_session_factory() as db:
-        await report_runs.complete(db, report_id, user_id, diagnostic)
-        await db.commit()
+        try:
+            completed = await report_runs.complete(db, report_id, user_id, diagnostic)
+            if not completed:
+                await db.rollback()
+                completion_failed = True
+            else:
+                await db.commit()
+                return "complete"
+        except Exception:
+            await db.rollback()
+            completion_failed = True
+
+    if completion_failed:
+        await _mark_failed(report_id, user_id)
+        return "failed"
+
+    return "failed"

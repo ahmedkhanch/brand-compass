@@ -2,10 +2,11 @@
 
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Brand, Report, ReportCost, ReportStatus
+from app.repositories import reports
 from app.schemas.brand import BrandCreate
 
 
@@ -29,23 +30,22 @@ async def create_submission(db: AsyncSession, user_id: str, data: BrandCreate) -
     return report
 
 
-async def owned(db: AsyncSession, report_id: str, user_id: str) -> Report | None:
-    return (await db.execute(
-        select(Report).where(Report.id == report_id, Report.user_id == user_id)
-    )).scalar_one_or_none()
-
-
-async def mark_running(db: AsyncSession, report_id: str, user_id: str) -> bool:
-    report = await owned(db, report_id, user_id)
-    if report is None:
-        return False
-    report.status = ReportStatus.RUNNING
-    await db.flush()
-    return True
+async def claim_queued(db: AsyncSession, report_id: str, user_id: str) -> bool:
+    """Atomically claim one owned queued report for a single execution."""
+    result = await db.execute(
+        update(Report)
+        .where(
+            Report.id == report_id,
+            Report.user_id == user_id,
+            Report.status == ReportStatus.QUEUED,
+        )
+        .values(status=ReportStatus.RUNNING)
+    )
+    return result.rowcount == 1
 
 
 async def complete(db: AsyncSession, report_id: str, user_id: str, diagnostic: dict) -> bool:
-    report = await owned(db, report_id, user_id)
+    report = await reports.owned(db, report_id, user_id)
     if report is None:
         return False
 
@@ -73,7 +73,7 @@ async def complete(db: AsyncSession, report_id: str, user_id: str, diagnostic: d
 
 
 async def fail(db: AsyncSession, report_id: str, user_id: str, message: str) -> bool:
-    report = await owned(db, report_id, user_id)
+    report = await reports.owned(db, report_id, user_id)
     if report is None:
         return False
     report.status = ReportStatus.FAILED

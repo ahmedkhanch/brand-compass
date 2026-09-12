@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Credit, TierEnum
 from app.config import settings
 from app.repositories import credits
+from app.services.entitlements import current_tier
 from app.schemas.common import ERROR_INSUFFICIENT_CREDITS
 
 TIER_CREDIT_MAP = {
@@ -46,7 +47,7 @@ async def get_or_create_credits(db: AsyncSession, user_id: str, tier: TierEnum) 
 async def deduct_credit(db: AsyncSession, user_id: str) -> Credit:
     """Deduct 1 credit. Raises 402 if balance is 0."""
     # Get user's tier
-    tier = await credits.active_tier(db, user_id)
+    tier = await current_tier(db, user_id)
 
     credit = await get_or_create_credits(db, user_id, tier)
 

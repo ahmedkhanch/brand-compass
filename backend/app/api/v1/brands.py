@@ -8,11 +8,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.core.deps import get_or_create_user
 from app.schemas.brand import BrandCreate
+from app.schemas.common import ApiError, AUTH_RESPONSES
 from app.schemas.report import AnalyzeReportMeta, AnalyzeReportResponse, JobResponse
 from app.jobs.dispatch import enqueue_report
 from app.services import report_submission
 
 router = APIRouter()
+
+ANALYZE_RESPONSES = {
+    **AUTH_RESPONSES,
+    402: {"model": ApiError, "description": "No report credit remains for the current period."},
+    429: {"model": ApiError, "description": "The tier-specific submission limit is exceeded."},
+    503: {"model": ApiError, "description": "Identity or internal report-job execution is unavailable."},
+}
 
 
 @router.post(
@@ -20,6 +28,7 @@ router = APIRouter()
     response_model=AnalyzeReportResponse,
     summary="Submit an owned brand analysis",
     description="Reserves one credit, creates one queued report, and enqueues its authorized job.",
+    responses=ANALYZE_RESPONSES,
 )
 async def analyze_brand(
     input: BrandCreate,

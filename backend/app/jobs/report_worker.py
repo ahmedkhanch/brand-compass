@@ -1,24 +1,26 @@
-"""
-ARQ-compatible report generation worker.
-Per README §6.3: picked up by ARQ when Redis is available.
-Also callable directly as a FastAPI BackgroundTask when Redis is unavailable.
-"""
+"""ARQ worker that calls the API execution boundary over HTTP."""
 
-async def generate_report(ctx, brand_input: dict, user_id: str, report_id: str):
+import httpx
+
+from app.jobs import report_client
+
+
+async def generate_report(ctx, report_id: str, job_token: str):
     """
-    ARQ worker function. Runs the full diagnostic pipeline and saves results.
+    ARQ worker function. It has no database session or pipeline import.
 
     Args:
-        ctx: ARQ worker context (provides Redis, etc.)
-        brand_input: {name, website_url, industry, competitor, social_accounts}
-        user_id: Clerk user ID
-        report_id: UUID of the report row to update
+        ctx: ARQ worker context; tests may supply an HTTP client adapter.
+        report_id: UUID bound into the signed job token.
+        job_token: short-lived service credential, never sent to a browser.
     """
-    from app.services import report_pipeline
+    client = ctx.get("http_client") if isinstance(ctx, dict) else None
+    if client is not None and not isinstance(client, httpx.AsyncClient):
+        raise TypeError("Worker HTTP client must be an httpx.AsyncClient")
+    await report_client.execute_report(report_id, job_token, client=client)
 
-    await report_pipeline.run(brand_input, user_id, report_id)
 
 
-async def generate_report_sync(brand_input: dict, user_id: str, report_id: str):
+async def generate_report_sync(report_id: str, job_token: str):
     """Synchronous wrapper for use as FastAPI BackgroundTask (no Redis)."""
-    return await generate_report(None, brand_input, user_id, report_id)
+    return await generate_report(None, report_id, job_token)

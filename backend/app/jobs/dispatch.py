@@ -3,19 +3,18 @@
 import threading
 
 from app.config import settings
+from app.jobs import report_client
 from app.services.report_submission import QueuedReport
 
 
 def _run_locally(job: QueuedReport) -> None:
     import asyncio
 
-    from app.services import report_pipeline
-
     async def run_after_submission_commit() -> None:
         # Preserve the historical delay that lets the request transaction commit
         # before the local runner reads the newly queued report.
         await asyncio.sleep(1)
-        await report_pipeline.run(job.brand_input, job.user_id, job.report_id)
+        await report_client.execute_report(job.report_id, job.job_token)
 
     asyncio.run(run_after_submission_commit())
 
@@ -30,9 +29,8 @@ async def enqueue_report(job: QueuedReport) -> None:
             pool = await create_pool(RedisSettings.from_dsn(settings.REDIS_URL))
             await pool.enqueue_job(
                 "generate_report",
-                brand_input=job.brand_input,
-                user_id=job.user_id,
                 report_id=job.report_id,
+                job_token=job.job_token,
             )
             return
         except Exception:

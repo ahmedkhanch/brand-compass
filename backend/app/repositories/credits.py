@@ -3,17 +3,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Credit, Subscription, TierEnum
-
-
-async def active_tier(db: AsyncSession, user_id: str) -> TierEnum:
-    tier = (await db.execute(
-        select(Subscription.tier).where(
-            Subscription.user_id == user_id,
-            Subscription.status == "active",
-        )
-    )).scalar_one_or_none()
-    return tier or TierEnum.BOUSSOLE
+from app.models import Credit
 
 
 async def credit_for_user(db: AsyncSession, user_id: str) -> Credit | None:

@@ -4,7 +4,7 @@
   "title": "Soumission et persistance du pipeline",
   "status": "validated_in_isolation",
   "environment": "Hetzner 8 Go · base temporaire créée par Alembic",
-  "summary": "La soumission d’analyse passe par un service et des repositories. Les adaptations locale et ARQ délèguent au même service de pipeline, qui persiste les états et les coûts existants.",
+  "summary": "La soumission d’analyse passe par un service et des repositories. Les adaptations locale et ARQ appellent un endpoint interne HTTP muni d’un jeton signé et borné ; seul cet endpoint délègue au service de pipeline, qui persiste les états et les coûts existants.",
   "checks": [
     {
       "id": "F04A-01",
@@ -15,22 +15,22 @@
     },
     {
       "id": "F04A-02",
-      "title": "Pipeline commun et persistance",
+      "title": "Exécution interne bornée et persistance",
       "status": "passed",
-      "procedure": "Exécuter un diagnostic fixture via le service de pipeline et relire le rapport par l’API.",
-      "evidence": "Le rapport devient complete, conserve scores/payload et retire _costs du payload public."
+      "procedure": "Exécuter un diagnostic fixture via l’endpoint interne avec le jeton du job, puis relire le rapport par l’API.",
+      "evidence": "Un seul claim queued devient complete, conserve scores/payload et retire _costs du payload public ; une erreur moteur est finalisée avec un message sûr."
     },
     {
       "id": "F04A-03",
-      "title": "Contrat worker et OpenAPI",
+      "title": "Contrat worker HTTP, anti-rejeu et OpenAPI",
       "status": "passed",
-      "procedure": "Remplacer le service de pipeline par une fixture dans le worker et contrôler le schéma OpenAPI de la soumission.",
-      "evidence": "Le worker délègue sans import de session/ORM ; POST /api/v1/brands/analyze a une entrée et sortie typées dans Swagger."
+      "procedure": "Faire appeler au worker son client HTTP sur un transport simulé, tenter un jeton altéré ou un second claim, et contrôler les schémas OpenAPI public et interne.",
+      "evidence": "Le worker n’importe ni session ni ORM ; les jetons mal signés, hors scope ou hors propriétaire sont refusés et un second lancement ne rappelle pas le fournisseur."
     }
   ],
   "limitations": [
-    "Le worker reste un adaptateur du service local dans F04-A ; son appel d’API interne avec identité de service est suivi dans F04-B.",
-    "La politique de remboursement, l’idempotence et le débit concurrent restent dans R03.",
+    "La clé de signature et l’origine interne sont configurées par instance hors dépôt ; aucun navigateur ne reçoit le jeton de job.",
+    "La politique de remboursement et les délais de reprise durable restent à définir dans R03.",
     "Les fournisseurs externes ne sont pas appelés par ces tests fixture."
   ]
 }

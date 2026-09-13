@@ -39,7 +39,7 @@ job_bearer = HTTPBearer(
         401: {"model": ReportJobError, "description": "Missing, expired, invalid or incorrectly scoped job token"},
         403: {"model": ReportJobError, "description": "Requested report does not match the signed report"},
         409: {"model": ReportJobError, "description": "Owned queued report could not be claimed"},
-        503: {"model": ReportJobError, "description": "Job signing configuration is unavailable"},
+        503: {"model": ReportJobError, "description": "Job signing or terminal report persistence is unavailable"},
     },
 )
 async def execute_report_job(
@@ -61,7 +61,10 @@ async def execute_report_job(
     if request.report_id != report_id or claims.report_id != report_id:
         raise HTTPException(403, "Report does not match job authorization")
 
-    status = await report_pipeline.execute(claims.brand_input.model_dump(), claims.user_id, report_id)
+    try:
+        status = await report_pipeline.execute(claims.brand_input.model_dump(), claims.user_id, report_id)
+    except report_pipeline.ReportPersistenceUnavailable:
+        raise HTTPException(503, "Report execution state could not be finalized") from None
     if status == "not_claimed":
         raise HTTPException(409, "Owned queued report could not be claimed")
     return ReportJobExecutionResponse(report_id=report_id, status=status)

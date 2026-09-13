@@ -1,8 +1,16 @@
 """Strict contracts for server-authorized report execution."""
 
 from typing import Literal
+from dataclasses import dataclass, field
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+@dataclass(frozen=True)
+class QueuedReport:
+    report_id: str
+    job_token: str = field(repr=False)
+    tier: str
 
 
 class ReportJobBrandInput(BaseModel):

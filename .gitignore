@@ -45,3 +45,8 @@ backend/data/
 # E2E test output (screenshots + ad-hoc playwright symlink)
 tests/e2e/artifacts/
 tests/e2e/node_modules
+
+# Validation artifacts
+.coverage*
+coverage/
+!backend/.coveragerc

@@ -13,6 +13,9 @@ from app.schemas.report_job import ReportJobClaims
 JOB_AUDIENCE = "radaros-report-api"
 JOB_PURPOSE = "report-execution"
 JOB_ISSUER = "radaros-report-submission"
+MIN_JOB_TTL_SECONDS = 30
+MAX_JOB_TTL_SECONDS = 3600
+MIN_SECRET_BYTES = 32
 
 
 class JobTokenUnavailable(RuntimeError):
@@ -25,7 +28,7 @@ class InvalidJobToken(ValueError):
 
 def _secret() -> str:
     secret = settings.REPORT_JOB_SECRET
-    if not secret or len(secret.encode("utf-8")) < 32:
+    if not secret or len(secret.encode("utf-8")) < MIN_SECRET_BYTES:
         raise JobTokenUnavailable("Report job signing requires a secret of at least 32 bytes")
     return secret
 
@@ -43,7 +46,7 @@ def require_runtime_configuration() -> None:
             or origin.path not in {"", "/"}
             or origin.query
             or origin.fragment
-            or not 1 <= settings.REPORT_JOB_TOKEN_TTL_SECONDS <= 3600
+            or not MIN_JOB_TTL_SECONDS <= settings.REPORT_JOB_TOKEN_TTL_SECONDS <= MAX_JOB_TTL_SECONDS
         ):
             raise JobTokenUnavailable("Invalid report job runtime configuration")
         # Accessing port also validates malformed/non-numeric port settings.
@@ -56,8 +59,8 @@ def issue_report_job_token(brand_input: dict[str, str], user_id: str, report_id:
     """Sign only the owner, report and immutable input approved by submission."""
     secret = _secret()
     ttl = settings.REPORT_JOB_TOKEN_TTL_SECONDS
-    if not 1 <= ttl <= 3600:
-        raise JobTokenUnavailable("Report job token lifetime must be between 1 and 3600 seconds")
+    if not MIN_JOB_TTL_SECONDS <= ttl <= MAX_JOB_TTL_SECONDS:
+        raise JobTokenUnavailable("Report job token lifetime must be between 30 and 3600 seconds")
     request = ReportJobClaims(user_id=user_id, report_id=report_id, brand_input=brand_input)
     now = int(time.time())
     return jwt.encode(
@@ -98,7 +101,7 @@ def verify_report_job_token(token: str) -> ReportJobClaims:
             claims["purpose"] != JOB_PURPOSE
             or type(claims["iat"]) is not int
             or type(claims["exp"]) is not int
-            or not 0 < claims["exp"] - claims["iat"] <= 3600
+            or not MIN_JOB_TTL_SECONDS <= claims["exp"] - claims["iat"] <= MAX_JOB_TTL_SECONDS
         ):
             raise InvalidJobToken("Invalid report job token")
         return signed_request

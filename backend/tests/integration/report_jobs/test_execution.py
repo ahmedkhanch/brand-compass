@@ -273,3 +273,122 @@ def test_internal_execution_openapi_has_typed_contract_and_errors():
     )
     assert {"401", "403", "409", "422", "503"} <= operation["responses"].keys()
     assert schema["components"]["schemas"]["ReportJobExecutionRequest"]["additionalProperties"] is False
+
+
+@pytest.mark.asyncio
+async def test_empty_brand_name_is_rejected_without_debit(client, monkeypatch):
+    headers = {"Authorization": "Bearer dev-user-invalid-brand"}
+    before = await client.get("/api/v1/credits", headers=headers)
+    queued = []
+
+    async def capture(job):
+        queued.append(job)
+
+    monkeypatch.setattr(brands, "enqueue_report", capture)
+    response = await client.post(
+        "/api/v1/brands/analyze", headers=headers, json={**BRAND_INPUT, "name": ""},
+    )
+    assert response.status_code == 422
+    after = await client.get("/api/v1/credits", headers=headers)
+    assert after.json()["data"]["balance"] == before.json()["data"]["balance"]
+    assert queued == []
+
+
+@pytest.mark.asyncio
+async def test_one_second_token_configuration_rejected_before_debit(client, monkeypatch):
+    headers = {"Authorization": "Bearer dev-user-short-job-ttl"}
+    before = await client.get("/api/v1/credits", headers=headers)
+    monkeypatch.setattr(settings, "REPORT_JOB_TOKEN_TTL_SECONDS", 1)
+    monkeypatch.setattr(brands, "enqueue_report", _ignore_dispatch)
+    response = await client.post("/api/v1/brands/analyze", headers=headers, json=BRAND_INPUT)
+    assert response.status_code == 503
+    after = await client.get("/api/v1/credits", headers=headers)
+    assert after.json()["data"]["balance"] == before.json()["data"]["balance"]
+
+
+async def _ignore_dispatch(job):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_signing_failure_rolls_back_submission(client, monkeypatch):
+    headers = {"Authorization": "Bearer dev-user-signing-failure"}
+    before = await client.get("/api/v1/credits", headers=headers)
+
+    def fail_signing(**kwargs):
+        raise report_job_token.JobTokenUnavailable("signer unavailable")
+
+    monkeypatch.setattr(report_job_token, "issue_report_job_token", fail_signing)
+    try:
+        response = await client.post("/api/v1/brands/analyze", headers=headers, json=BRAND_INPUT)
+    except report_job_token.JobTokenUnavailable:
+        response = None
+    after = await client.get("/api/v1/credits", headers=headers)
+    assert after.json()["data"]["balance"] == before.json()["data"]["balance"]
+    assert response is not None and response.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_failure_persistence_error_is_not_reported_as_finalized(client, monkeypatch, submit_job):
+    job, headers = await submit_job("job-failure-write")
+
+    def diagnostic(_):
+        raise RuntimeError("provider unavailable")
+
+    async def fail_write(*args):
+        raise RuntimeError("database unavailable")
+
+    monkeypatch.setattr(report_pipeline, "_run_diagnostic", diagnostic)
+    monkeypatch.setattr(report_pipeline.report_runs, "fail", fail_write)
+    response = await execute(client, job.report_id, job.job_token)
+    assert response.status_code == 503
+    assert "database unavailable" not in response.text
+    report = await client.get(f"/api/v1/reports/{job.report_id}", headers=headers)
+    assert report.json()["data"]["status"] == "running"
+
+
+@pytest.mark.asyncio
+async def test_unavailable_signer_refuses_execution(client, monkeypatch):
+    token = report_job_token.issue_report_job_token(BRAND_INPUT, "owner", "report")
+    monkeypatch.setattr(settings, "REPORT_JOB_SECRET", None)
+    response = await execute(client, "report", token)
+    assert response.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_real_demo_pipeline_through_internal_boundary(client, submit_job):
+    job, headers = await submit_job("real-demo-pipeline")
+    response = await execute(client, job.report_id, job.job_token)
+    assert response.status_code == 200
+    assert response.json()["status"] == "complete"
+    report = await client.get(f"/api/v1/reports/{job.report_id}", headers=headers)
+    assert report.json()["data"]["status"] == "complete"
+    assert report.json()["data"]["scores"]["overall"] is not None
+    assert "_costs" not in report.json()["data"].get("payload", {})
+
+
+@pytest.mark.asyncio
+async def test_report_disappearing_during_completion_returns_unavailable(client, monkeypatch, submit_job):
+    from unittest.mock import AsyncMock
+
+    job, _ = await submit_job("disappearing-report")
+    monkeypatch.setattr(report_pipeline, "_run_diagnostic", lambda _: {})
+    monkeypatch.setattr(report_pipeline.report_runs, "complete", AsyncMock(return_value=False))
+    monkeypatch.setattr(report_pipeline.report_runs, "fail", AsyncMock(return_value=False))
+    response = await execute(client, job.report_id, job.job_token)
+    assert response.status_code == 503
+    assert "could not be finalized" in response.text
+
+
+@pytest.mark.asyncio
+async def test_provider_cost_is_not_exposed_in_report_payload(client, monkeypatch, submit_job):
+    job, headers = await submit_job("provider-cost")
+    monkeypatch.setattr(report_pipeline, "_run_diagnostic", lambda _: {
+        "overall_score": 70,
+        "_costs": [{"provider": "synthetic-provider", "tokens_in": 12, "tokens_out": 7,
+                    "cost_cents": 1, "duration_ms": 2}],
+    })
+    assert (await execute(client, job.report_id, job.job_token)).json()["status"] == "complete"
+    report = await client.get(f"/api/v1/reports/{job.report_id}", headers=headers)
+    assert "synthetic-provider" not in report.text
+    assert "_costs" not in report.text

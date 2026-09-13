@@ -1,9 +1,11 @@
 {
   "id": "pipeline-boundary",
-  "tickets": ["F04-A"],
+  "tickets": [
+    "F04-A"
+  ],
   "title": "Soumission et persistance du pipeline",
   "status": "validated_in_isolation",
-  "environment": "Hetzner 8 Go · base temporaire créée par Alembic",
+  "environment": "Environnements isolés macOS / Linux · base temporaire créée par Alembic",
   "summary": "La soumission d’analyse passe par un service et des repositories. Les adaptations locale et ARQ appellent un endpoint interne HTTP muni d’un jeton signé et borné ; seul cet endpoint délègue au service de pipeline, qui persiste les états et les coûts existants.",
   "checks": [
     {
@@ -26,6 +28,20 @@
       "status": "passed",
       "procedure": "Faire appeler au worker son client HTTP sur un transport simulé, tenter un jeton altéré ou un second claim, et contrôler les schémas OpenAPI public et interne.",
       "evidence": "Le worker n’importe ni session ni ORM ; les jetons mal signés, hors scope ou hors propriétaire sont refusés et un second lancement ne rappelle pas le fournisseur."
+    },
+    {
+      "id": "F04A-04",
+      "title": "Échecs de soumission et de persistance",
+      "status": "passed",
+      "procedure": "Soumettre un nom vide, simuler une panne de signature ou de finalisation, puis relire les crédits et le statut via les API.",
+      "evidence": "Nom vide refusé avant débit ; panne de signature annulée ; une finalisation non persistée renvoie 503 sans annoncer un état terminal fictif."
+    },
+    {
+      "id": "F04A-05",
+      "title": "Temps d’attente et ressources des runners",
+      "status": "passed",
+      "procedure": "Faire attendre le worker sur une vraie connexion HTTP plus de dix secondes ; vérifier le repli local et la fermeture du pool de queue.",
+      "evidence": "Le worker attend la réponse ; les pools sont fermés ; la durée minimale des jetons est bornée à 30 secondes."
     }
   ],
   "limitations": [

@@ -20,14 +20,20 @@ def _run_diagnostic(brand_input: dict[str, str]) -> dict:
 SAFE_FAILURE_MESSAGE = "Analysis execution failed"
 
 
+class ReportPersistenceUnavailable(RuntimeError):
+    """Execution could not persist a reliable terminal report state."""
+
+
 async def _mark_failed(report_id: str, user_id: str) -> None:
     """Persist a safe terminal state without exposing engine errors."""
     async with async_session_factory() as db:
         try:
-            await report_runs.fail(db, report_id, user_id, SAFE_FAILURE_MESSAGE)
+            if not await report_runs.fail(db, report_id, user_id, SAFE_FAILURE_MESSAGE):
+                raise ReportPersistenceUnavailable("Report no longer available")
             await db.commit()
         except Exception:
             await db.rollback()
+            raise ReportPersistenceUnavailable("Report failure could not be persisted") from None
 
 
 async def execute(brand_input: dict[str, str], user_id: str, report_id: str) -> str:
@@ -43,22 +49,15 @@ async def execute(brand_input: dict[str, str], user_id: str, report_id: str) -> 
         await _mark_failed(report_id, user_id)
         return "failed"
 
-    completion_failed = False
     async with async_session_factory() as db:
         try:
             completed = await report_runs.complete(db, report_id, user_id, diagnostic)
             if not completed:
                 await db.rollback()
-                completion_failed = True
             else:
                 await db.commit()
                 return "complete"
         except Exception:
             await db.rollback()
-            completion_failed = True
-
-    if completion_failed:
-        await _mark_failed(report_id, user_id)
-        return "failed"
-
+    await _mark_failed(report_id, user_id)
     return "failed"

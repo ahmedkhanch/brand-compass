@@ -18,9 +18,3 @@ async def generate_report(ctx, report_id: str, job_token: str):
     if client is not None and not isinstance(client, httpx.AsyncClient):
         raise TypeError("Worker HTTP client must be an httpx.AsyncClient")
     await report_client.execute_report(report_id, job_token, client=client)
-
-
-
-async def generate_report_sync(report_id: str, job_token: str):
-    """Synchronous wrapper for use as FastAPI BackgroundTask (no Redis)."""
-    return await generate_report(None, report_id, job_token)

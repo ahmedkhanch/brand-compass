@@ -1,11 +1,11 @@
 """Brand request/response schemas."""
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
 class BrandCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1)
     website_url: Optional[str] = None
     social_accounts: Optional[dict] = None
     industry: Optional[str] = None

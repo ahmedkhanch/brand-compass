@@ -15,7 +15,7 @@ from fastapi import Depends
 from pydantic import BaseModel
 from sqlalchemy import select
 
-_DB_FILE = Path(tempfile.gettempdir()) / "radaros-http-contracts.db"
+_DB_FILE = Path(tempfile.gettempdir()) / f"radaros-http-contracts-{uuid.uuid4().hex}.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_DB_FILE}"
 os.environ["DEMO_MODE"] = "true"
 os.environ["ALLOW_DEMO_AUTH"] = "true"

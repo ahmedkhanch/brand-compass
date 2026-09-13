@@ -5,9 +5,10 @@ Per README §6.3: "Credit consumed before queue."
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.models import Credit, Subscription, TierEnum
+from app.models import Credit, TierEnum
 from app.config import settings
+from app.repositories import credits
+from app.services.entitlements import current_tier
 from app.schemas.common import ERROR_INSUFFICIENT_CREDITS
 
 TIER_CREDIT_MAP = {
@@ -19,11 +20,10 @@ TIER_CREDIT_MAP = {
 
 async def get_or_create_credits(db: AsyncSession, user_id: str, tier: TierEnum) -> Credit:
     """Get user's credit row, or create one with this month's allocation."""
-    result = await db.execute(select(Credit).where(Credit.user_id == user_id))
-    credit = result.scalar_one_or_none()
+    credit = await credits.credit_for_user(db, user_id)
 
     if credit is None:
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timezone
         now = datetime.now(timezone.utc)
         # Start of current month
         period_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -39,8 +39,7 @@ async def get_or_create_credits(db: AsyncSession, user_id: str, tier: TierEnum) 
             period_start=period_start,
             period_end=period_end,
         )
-        db.add(credit)
-        await db.flush()
+        await credits.add_credit(db, credit)
 
     return credit
 
@@ -48,14 +47,7 @@ async def get_or_create_credits(db: AsyncSession, user_id: str, tier: TierEnum) 
 async def deduct_credit(db: AsyncSession, user_id: str) -> Credit:
     """Deduct 1 credit. Raises 402 if balance is 0."""
     # Get user's tier
-    result = await db.execute(
-        select(Subscription).where(
-            Subscription.user_id == user_id,
-            Subscription.status == "active",
-        )
-    )
-    sub = result.scalar_one_or_none()
-    tier = sub.tier if sub else TierEnum.BOUSSOLE
+    tier = await current_tier(db, user_id)
 
     credit = await get_or_create_credits(db, user_id, tier)
 

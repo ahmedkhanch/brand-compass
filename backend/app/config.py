@@ -1,6 +1,8 @@
 """Application configuration — all env vars with dev defaults."""
 
 from pathlib import Path
+from pydantic_settings import BaseSettings
+from typing import Optional
 from dotenv import load_dotenv
 
 # Load .env BEFORE instantiating Settings, otherwise all API keys read as None.
@@ -9,8 +11,6 @@ _ENV_PATH = Path(__file__).resolve().parent.parent.parent / ".env"
 if _ENV_PATH.exists():
     load_dotenv(_ENV_PATH)
 
-from pydantic_settings import BaseSettings
-from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -35,6 +35,13 @@ class Settings(BaseSettings):
 
     # ── Redis (optional for local dev) ──
     REDIS_URL: Optional[str] = None
+
+    # ── Internal report execution ──
+    # Set per instance outside the repository. Browser clients never receive it.
+    REPORT_JOB_SECRET: Optional[str] = None
+    REPORT_JOB_TOKEN_TTL_SECONDS: int = 300
+    INTERNAL_API_ORIGIN: Optional[str] = None
+    INTERNAL_API_TIMEOUT_SECONDS: float = 330.0
 
     # ── Clerk Auth ──
     CLERK_SECRET_KEY: Optional[str] = None

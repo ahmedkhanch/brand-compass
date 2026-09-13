@@ -11,6 +11,18 @@ class JobResponse(BaseModel):
     status: str = "queued"
 
 
+class AnalyzeReportMeta(BaseModel):
+    tier: str
+    credits_remaining: int | None = None
+
+
+class AnalyzeReportResponse(BaseModel):
+    success: bool = True
+    data: JobResponse
+    error: None = None
+    meta: AnalyzeReportMeta
+
+
 class ReportResponse(BaseModel):
     id: str
     user_id: str
